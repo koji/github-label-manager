@@ -1,10 +1,7 @@
 import { Octokit } from '@octokit/core';
 import readlineSync from 'readline-sync';
-
-// import { labels } from './label';
 import { createSingleLabel } from './lib/createSingleLabel';
 import { deleteSingleLabel } from './lib/deleteSingleLabel';
-
 import { createLabel, deleteLabel, createLabels, deleteLabels } from './lib/callApi';
 
 // cancel: -1, single: 0, multi: 1, delete label"2, delete all labels: 3
@@ -23,14 +20,6 @@ if (selectedTypeIndex === -1) {
   console.log('Canceled');
   process.exit(1);
 }
-
-// const createMultipleLabels = async () => {
-//   labels.forEach(async (label) => {
-//     createLabel(label);
-//   });
-//   console.log('Created all labels');
-// };
-
 
 // get information to access github api for managing labels
 const githubToken = readlineSync.question('Github token: ', {
@@ -55,7 +44,6 @@ switch (selectedTypeIndex) {
   }
   case 1: {
     createLabels(octokit, userInfo);
-    // console.log('create multiple labels');
     break;
   }
   case 2: {
