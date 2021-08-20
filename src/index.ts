@@ -1,10 +1,11 @@
 import { Octokit } from '@octokit/core';
 import readlineSync from 'readline-sync';
 
-import { labels } from './label';
+// import { labels } from './label';
 import { createSingleLabel } from './lib/createSingleLabel';
 import { deleteSingleLabel } from './lib/deleteSingleLabel';
-import { CreateLabelResponseType, ImportLabelType } from './types';
+
+import { createLabel, deleteLabel, createLabels, deleteLabels } from './lib/callApi';
 
 // cancel: -1, single: 0, multi: 1, delete label"2, delete all labels: 3
 const labelCreationType = [
@@ -23,78 +24,13 @@ if (selectedTypeIndex === -1) {
   process.exit(1);
 }
 
-const createLabel = async (label: ImportLabelType) => {
-  const resp = await octokit.request('POST /repos/{owner}/{repo}/labels', {
-    owner: owner,
-    repo: repo,
-    name: label.name,
-    color: label.color,
-    description: label.description,
-  });
+// const createMultipleLabels = async () => {
+//   labels.forEach(async (label) => {
+//     createLabel(label);
+//   });
+//   console.log('Created all labels');
+// };
 
-  const status = resp.status as CreateLabelResponseType;
-
-  switch (status) {
-    case 201:
-      console.log(`${resp.status}: Created ${label.name}`);
-      break;
-    case 404:
-      console.log(`${resp.status}: Resource not found`);
-      break;
-    case 422:
-      console.log(`${resp.status}: Validation failed`);
-      break;
-    default:
-      console.log(`${resp.status}: Something wrong`);
-      break;
-  }
-};
-
-const deleteLabel = (labelNames: readonly string[]) => {
-  labelNames.forEach(async (labelName: string) => {
-    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-      owner: owner,
-      repo: repo,
-      name: labelName,
-    });
-  });
-};
-
-const createMultipleLabels = async () => {
-  labels.forEach(async (label) => {
-    createLabel(label);
-  });
-  console.log('Created all labels');
-};
-
-// get all default labels
-const getLabels = async () => {
-  const resp = await octokit.request('GET /repos/{owner}/{repo}/labels', {
-    owner: owner,
-    repo: repo,
-  });
-
-  if (resp.status === 200) {
-    const names = await resp.data.map((label) => label.name);
-    return names;
-  } else {
-    console.log('something wrong');
-    return [];
-  }
-};
-
-const deleteAllLabels = async () => {
-  // get all labels
-  const names = await getLabels();
-  names.forEach(async (name: string) => {
-    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-      owner: owner,
-      repo: repo,
-      name: name,
-    });
-  });
-  names.forEach((label: string) => console.log(`deleted ${label}`));
-};
 
 // get information to access github api for managing labels
 const githubToken = readlineSync.question('Github token: ', {
@@ -106,24 +42,29 @@ const octokit = new Octokit({
 // input owner and repo name
 const owner = readlineSync.question('Please type your GitHub account ');
 const repo = readlineSync.question('Please type your target repo name ');
+const userInfo = {
+  owner: owner,
+  repo: repo,
+};
 
 switch (selectedTypeIndex) {
   case 0: {
     const newLabel = createSingleLabel();
-    createLabel(newLabel);
+    createLabel(octokit, userInfo, newLabel);
     break;
   }
   case 1: {
-    createMultipleLabels();
+    createLabels(octokit, userInfo);
+    // console.log('create multiple labels');
     break;
   }
   case 2: {
     const targetLabel = deleteSingleLabel();
-    deleteLabel(targetLabel);
+    deleteLabel(octokit, userInfo, targetLabel);
     break;
   }
   case 3: {
-    deleteAllLabels();
+    deleteLabels(octokit, userInfo);
     break;
   }
   default: {

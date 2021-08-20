@@ -15,3 +15,8 @@ export type LabelType = ImportLabelType & {
 };
 
 export type CreateLabelResponseType = 201 | 404 | 422;
+
+export type UserInfoType = {
+  owner: string;
+  repo: string;
+}

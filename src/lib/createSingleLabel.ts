@@ -16,5 +16,4 @@ export const createSingleLabel = () => {
     description: labelDescription,
   };
   return label;
-  // createLabel(label);
 };
