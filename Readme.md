@@ -8,7 +8,6 @@ https://docs.github.com/en/rest/reference/issues#labels
 `label data format`
 ```json
 // label format
-/*
   {
     id: 3218144327,
     node_id: 'MDU6TGFiZWwzMjE4MTQ0MzI3',
@@ -18,7 +17,6 @@ https://docs.github.com/en/rest/reference/issues#labels
     default: true,
     description: 'This will not be worked on'
   }
-*/
 ```
 
 ### What this script can do is the below.  
