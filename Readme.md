@@ -82,5 +82,54 @@ $ npm start
 
 After execute the command, you will need to type some information.
 
+#### create multiple labels
+
+```zsh
+$ yarn start
+yarn run v1.22.10
+$ node src/app.js
+
+[1] single label
+[2] multiple labels
+[3] delete label
+[4] delete all labels
+[0] CANCEL
+
+Create a single label or multiple labels from json [1...4 / 0]: 2
+Github token: ****************************************
+Please type your GitHub account koji
+Please type your target repo name github-label-manager
+Created all labels
+201: Created Status: Inactive (Abandoned)
+201: Created Status: Inactive (Invalid)
+201: Created Status: Canceled
+201: Created Effort Effortless
+201: Created Type: Improvement
+201: Created Type: Optimization
+201: Created Priority: ASAP
+201: Created Type: Modification
+201: Created Type: Enhancement
+201: Created Status: Completed
+201: Created Status: Pending
+201: Created Type: Bug Fix
+201: Created Status: In Progress
+201: Created Effort Heavy
+201: Created Status: Inactive (Won't Fix)
+201: Created Effort Light
+201: Created Priority: Medium
+201: Created Effort Painful
+201: Created Priority: Safe
+201: Created Status: Available
+201: Created Priority: Low
+201: Created Effort Normal
+201: Created Feedback Suggestion
+201: Created Feedback Question
+201: Created Feedback Discussion
+201: Created Status: Inactive (Duplicate)
+201: Created Priority: High
+201: Created Type: Security Fix
+✨  Done in 21.52s.
+```
+
 ### Article
 https://seantrane.com/posts/logical-colorful-github-labels-18230/  
