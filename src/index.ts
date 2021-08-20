@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/core';
 import readlineSync from 'readline-sync';
 
 import { labels } from './label';
+import { createSingleLabel } from './lib/createSingleLabel';
 import { CreateLabelResponseType, ImportLabelType } from './types';
 
 // cancel: -1, single: 0, multi: 1, delete label"2, delete all labels: 3
@@ -46,22 +47,6 @@ const createLabel = async (label: ImportLabelType) => {
       console.log(`${resp.status}: Something wrong`);
       break;
   }
-};
-
-const createSingleLabel = async () => {
-  const labelName = readlineSync.question('Please type new label name ');
-  const labelColor = readlineSync.question(
-    "Please type label color without '#' "
-  );
-  const labelDescription = readlineSync.question(
-    'Please type label description '
-  );
-  const label = {
-    name: labelName,
-    color: labelColor,
-    description: labelDescription,
-  };
-  createLabel(label);
 };
 
 const createMultipleLabels = async () => {
@@ -125,19 +110,25 @@ const owner = readlineSync.question('Please type your GitHub account ');
 const repo = readlineSync.question('Please type your target repo name ');
 
 switch (selectedTypeIndex) {
-  case 0:
-    createSingleLabel();
+  case 0: {
+    const newLabel = createSingleLabel();
+    createLabel(newLabel);
     break;
-  case 1:
+  }
+  case 1: {
     createMultipleLabels();
     break;
-  case 2:
+  }
+  case 2: {
     deleteSingleLabel();
     break;
-  case 3:
+  }
+  case 3: {
     deleteAllLabels();
     break;
-  default:
+  }
+  default: {
     console.log('invalid input');
     break;
+  }
 }
