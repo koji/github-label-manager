@@ -1,53 +1,60 @@
 # github label manager
+
 This is very simple script to create/delete labels.  
-This script is using GitHub Labels API.  
+This script is using GitHub Labels API.
 
 ### Labels API
-https://docs.github.com/en/rest/reference/issues#labels  
+
+https://docs.github.com/en/rest/reference/issues#labels
 
 `label data format`
+
 ```json
 // label format
 {
-  id: 3218144327,
-  node_id: 'MDU6TGFiZWwzMjE4MTQ0MzI3',
-  url: 'https://api.github.com/repos/koji/frontend-tools/labels/wontfix',
-  name: 'wontfix',
-  color: 'ffffff',
-  default: true,
-  description: 'This will not be worked on'
+  "id": 3218144327,
+  "node_id": "MDU6TGFiZWwzMjE4MTQ0MzI3",
+  "url": "https://api.github.com/repos/koji/frontend-tools/labels/wontfix",
+  "name": "wontfix",
+  "color": "ffffff",
+  "default": true,
+  "description": "This will not be worked on"
 }
 ```
 
-### What this script can do is the below.  
-1. Create a single label on a specific repo  
-2. Create multiple labels on a specific repo  
-3. Delete a single label from a specific repo  
-4. Delete all labels from a specific repo  
+### What this script can do is the below.
 
-### Requirement: Personal Token about repo  
+1. Create a single label on a specific repo
+2. Create multiple labels on a specific repo
+3. Delete a single label from a specific repo
+4. Delete all labels from a specific repo
+
+### Requirement: Personal Token about repo
+
 You can generate a token [here](https://github.com/settings/tokens).
 
-
 ### What you will need to input
+
 1. Operation  
-    0: Cancel (terminate the process)  
-    1: Create a single label on a specific repo  
-    2: Create multiple labels on a specific repo  
-    3: Delete a single label from a specific repo  
-    4: Delete all labels from a specific repo  
+   0: Cancel (terminate the process)  
+   1: Create a single label on a specific repo  
+   2: Create multiple labels on a specific repo  
+   3: Delete a single label from a specific repo  
+   4: Delete all labels from a specific repo
 2. Token
 3. Your GitHub Id
 4. Target repo name
 
-If you want to create/delete a single label, you need to type the followings.  
+If you want to create/delete a single label, you need to type the followings.
 
 #### create
+
 - label name
 - label color (technically optional)
 - label description (technically optional)
 
 #### delete
+
 - label name
 
 In terms of multiple labels, this script is using `label.js` to define name, color and description. The format is very simple.  
@@ -68,7 +75,9 @@ module.exports = Object.freeze([
 ```
 
 ## How to use this
+
 clone this repo and run `app.js`
+
 ```zsh
 $ git clone https://github.com/koji/github-label-manager.git
 $ cd github-label-manager
@@ -82,12 +91,12 @@ $ npm start
 
 After execute the command, you will need to type some information.
 
-
 #### create single label
+
 https://user-images.githubusercontent.com/474225/130164576-80e52b14-d4c3-4cd4-a319-4a34832a6452.mov
 
-
 #### create multiple labels
+
 https://user-images.githubusercontent.com/474225/130164580-39959f7b-6bdc-4405-97c6-adbedb3dfc1a.mov
 
 ```zsh
@@ -138,4 +147,5 @@ Created all labels
 ```
 
 ### Article
-https://seantrane.com/posts/logical-colorful-github-labels-18230/  
+
+https://seantrane.com/posts/logical-colorful-github-labels-18230/
