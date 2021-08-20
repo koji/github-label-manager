@@ -82,7 +82,13 @@ $ npm start
 
 After execute the command, you will need to type some information.
 
+
+#### create single label
+https://user-images.githubusercontent.com/474225/130164576-80e52b14-d4c3-4cd4-a319-4a34832a6452.mov
+
+
 #### create multiple labels
+https://user-images.githubusercontent.com/474225/130164580-39959f7b-6bdc-4405-97c6-adbedb3dfc1a.mov
 
 ```zsh
 $ yarn start
