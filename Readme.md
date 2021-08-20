@@ -8,15 +8,15 @@ https://docs.github.com/en/rest/reference/issues#labels
 `label data format`
 ```json
 // label format
-  {
-    id: 3218144327,
-    node_id: 'MDU6TGFiZWwzMjE4MTQ0MzI3',
-    url: 'https://api.github.com/repos/koji/frontend-tools/labels/wontfix',
-    name: 'wontfix',
-    color: 'ffffff',
-    default: true,
-    description: 'This will not be worked on'
-  }
+{
+  id: 3218144327,
+  node_id: 'MDU6TGFiZWwzMjE4MTQ0MzI3',
+  url: 'https://api.github.com/repos/koji/frontend-tools/labels/wontfix',
+  name: 'wontfix',
+  color: 'ffffff',
+  default: true,
+  description: 'This will not be worked on'
+}
 ```
 
 ### What this script can do is the below.  
@@ -67,6 +67,20 @@ module.exports = Object.freeze([
   },
 ```
 
+## How to use this
+clone this repo and run `app.js`
+```zsh
+$ git clone https://github.com/koji/github-label-manager.git
+$ cd github-label-manager
+
+# use yarn
+$ yarn start
+
+# use npm
+$ npm start
+```
+
+After execute the command, you will need to type some information.
 
 ### Article
 https://seantrane.com/posts/logical-colorful-github-labels-18230/  
