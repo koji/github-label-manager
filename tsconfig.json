@@ -4,6 +4,7 @@
     "target": "es2017",
     "outDir": "build/main",
     "rootDir": "src",
+    "baseUrl": "src",
     "moduleResolution": "node",
     "module": "commonjs",
     "declaration": true,
