@@ -1,7 +1,6 @@
 # github label manager
 
-This is very simple script to create/delete labels.  
-This script is using GitHub Labels API.
+Simple CLI tool to create/delete labels with GitHub Labels API.  
 
 ### Labels API
 
