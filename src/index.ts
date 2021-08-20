@@ -3,6 +3,7 @@ import readlineSync from 'readline-sync';
 
 import { labels } from './label';
 import { createSingleLabel } from './lib/createSingleLabel';
+import { deleteSingleLabel } from './lib/deleteSingleLabel';
 import { CreateLabelResponseType, ImportLabelType } from './types';
 
 // cancel: -1, single: 0, multi: 1, delete label"2, delete all labels: 3
@@ -49,24 +50,21 @@ const createLabel = async (label: ImportLabelType) => {
   }
 };
 
+const deleteLabel = (labelNames: readonly string[]) => {
+  labelNames.forEach(async (labelName: string) => {
+    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
+      owner: owner,
+      repo: repo,
+      name: labelName,
+    });
+  });
+};
+
 const createMultipleLabels = async () => {
   labels.forEach(async (label) => {
     createLabel(label);
   });
   console.log('Created all labels');
-};
-
-const deleteSingleLabel = async () => {
-  // delete a single label
-  const labelName = readlineSync.question(
-    'Please type label name you want to delete '
-  );
-  await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-    owner: owner,
-    repo: repo,
-    name: labelName,
-  });
-  console.log(`deleted ${labelName}`);
 };
 
 // get all default labels
@@ -120,7 +118,8 @@ switch (selectedTypeIndex) {
     break;
   }
   case 2: {
-    deleteSingleLabel();
+    const targetLabel = deleteSingleLabel();
+    deleteLabel(targetLabel);
     break;
   }
   case 3: {
