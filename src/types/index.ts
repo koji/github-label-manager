@@ -16,7 +16,8 @@ export type LabelType = ImportLabelType & {
 
 export type CreateLabelResponseType = 201 | 404 | 422;
 
-export type UserInfoType = {
+export type ConfigType = {
+  octokit: any;
   owner: string;
   repo: string;
 }

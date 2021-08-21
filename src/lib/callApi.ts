@@ -2,13 +2,13 @@
 // create a label/labels
 // delete a label/labels
 
-import { CreateLabelResponseType, ImportLabelType, UserInfoType } from '../types';
+import { CreateLabelResponseType, ImportLabelType, ConfigType } from '../types';
 import { labels } from '../data';
 
-export const createLabel = async (octokit: any, userInfo: UserInfoType, label: ImportLabelType) => {
-  const resp = await octokit.request('POST /repos/{owner}/{repo}/labels', {
-    owner: userInfo.owner,
-    repo: userInfo.repo,
+export const createLabel = async (config: ConfigType, label: ImportLabelType) => {
+  const resp = await config.octokit.request('POST /repos/{owner}/{repo}/labels', {
+    owner: config.owner,
+    repo: config.repo,
     name: label.name,
     color: label.color,
     description: label.description,
@@ -32,28 +32,28 @@ export const createLabel = async (octokit: any, userInfo: UserInfoType, label: I
   }
 };
 
-export const createLabels = async (octokit: any, userInfo: UserInfoType) => {
+export const createLabels = async (config: ConfigType) => {
   labels.forEach(async (label) => {
-    createLabel(octokit, userInfo, label);
+    createLabel(config, label);
   });
   console.log('Created all labels');
 };
 
-export const deleteLabel = (octokit: any, userInfo: UserInfoType, labelNames: readonly string[]) => {
+export const deleteLabel = (config: ConfigType, labelNames: readonly string[]) => {
   labelNames.forEach(async (labelName: string) => {
-    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-      owner: userInfo.owner,
-      repo: userInfo.repo,
+    await config.octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
+      owner: config.owner,
+      repo: config.repo,
       name: labelName,
     });
   });
 };
 
 // get labels
-const getLabels = async (octokit: any, userInfo: UserInfoType) => {
-  const resp = await octokit.request('GET /repos/{owner}/{repo}/labels', {
-    owner: userInfo.owner,
-    repo: userInfo.repo,
+const getLabels = async (config: ConfigType) => {
+  const resp = await config.octokit.request('GET /repos/{owner}/{repo}/labels', {
+    owner: config.owner,
+    repo: config.repo,
   });
 
   if (resp.status === 200) {
@@ -65,13 +65,13 @@ const getLabels = async (octokit: any, userInfo: UserInfoType) => {
   }
 };
 
-export const deleteLabels = async (octokit: any, userInfo: UserInfoType) => {
+export const deleteLabels = async (config: ConfigType) => {
   // get all labels
-  const names = await getLabels(octokit, userInfo);
+  const names = await getLabels(config);
   names.forEach(async (name: string) => {
-    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-      owner: userInfo.owner,
-      repo: userInfo.repo,
+    await config.octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
+      owner: config.owner,
+      repo: config.repo,
       name: name,
     });
   });
