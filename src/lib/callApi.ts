@@ -3,7 +3,7 @@
 // delete a label/labels
 
 import { CreateLabelResponseType, ImportLabelType, UserInfoType } from '../types';
-import { labels } from '../label';
+import { labels } from '../data';
 
 export const createLabel = async (octokit: any, userInfo: UserInfoType, label: ImportLabelType) => {
   const resp = await octokit.request('POST /repos/{owner}/{repo}/labels', {
