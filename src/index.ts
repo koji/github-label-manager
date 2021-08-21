@@ -32,7 +32,6 @@ const setupInfo = () => {
 }
 
 
-
 const recursiveAsyncReadLine = () => {
   rl.question(
     "Please Choose an option:\n" +
@@ -42,7 +41,7 @@ const recursiveAsyncReadLine = () => {
       "4) delete a label\n" +
       "5) delete labels\n" +
       "6) Exit\n",
-    function (line) {
+    function (line: string) {
       switch (line) {
         case "1":
           // console.log("set info");
