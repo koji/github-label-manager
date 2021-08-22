@@ -216,3 +216,5 @@ export const AsciiText = figlet.textSync('GitHub Label Manager', {
   width: 180,
   whitespaceBreak: true,
 });
+
+export const extraGuideText = `If you don't see action selector, please hit space key.`;

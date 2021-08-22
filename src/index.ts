@@ -51,14 +51,14 @@ const main = async () => {
     }
 
     case 1: {
-      console.log('create labels');
+      // console.log('create labels');
       createLabels(configs);
       firstStart = firstStart && false;
       break;
     }
 
     case 2: {
-      console.log('delete a label');
+      // console.log('delete a label');
       const targetLabel = await getTargetLabel();
       deleteLabel(configs, targetLabel);
       firstStart = firstStart && false;
@@ -66,7 +66,7 @@ const main = async () => {
     }
 
     case 3: {
-      console.log('delete all labels');
+      // console.log('delete all labels');
       deleteLabels(configs);
       firstStart = firstStart && false;
       break;
