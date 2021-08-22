@@ -1,0 +1,1 @@
+import { githubConfigs } from './constant';
