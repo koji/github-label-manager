@@ -2,7 +2,7 @@
 // create a label/labels
 // delete a label/labels
 
-import { labels } from '../constant';
+import { extraGuideText, labels } from '../constant';
 import { ConfigType, CreateLabelResponseType, ImportLabelType } from '../types';
 
 export const createLabel = async (
@@ -43,6 +43,7 @@ export const createLabels = async (configs: ConfigType) => {
     createLabel(configs, label);
   });
   console.log('Created all labels');
+  console.log(extraGuideText);
 };
 
 export const deleteLabel = (
@@ -93,5 +94,7 @@ export const deleteLabels = async (configs: ConfigType) => {
       }
     );
   });
+  console.log('');
   names.forEach((label: string) => console.log(`deleted ${label}`));
+  console.log(extraGuideText);
 };

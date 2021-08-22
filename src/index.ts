@@ -1,20 +1,22 @@
 import { Octokit } from '@octokit/core';
 
+import { AsciiText, initialText } from './constant';
 import {
   createLabel,
   createLabels,
   deleteLabel,
   deleteLabels,
 } from './lib/callApi';
-import { AsciiText } from './lib/displayAsciiText';
 import { getTargetLabel } from './lib/inputDeleteLabel';
 import { getGitHubConfigs } from './lib/inputGitHubConfig';
 import { getNewLabel } from './lib/inputNewLabel';
 import { selectAction } from './lib/selectPrompts';
 import { ConfigType } from './types';
 
+let firstStart = true;
 // set up configs to access GitHub repo
 const setupConfigs = async () => {
+  console.log(initialText);
   const resp = await getGitHubConfigs();
   const octokit = new Octokit({
     auth: `${resp.octokit}`,
@@ -28,10 +30,13 @@ const setupConfigs = async () => {
 
 // steps
 // first call setupConfigs
-
+let configs: ConfigType;
 const main = async () => {
-  console.log(AsciiText);
-  const configs: ConfigType = await setupConfigs();
+  if (firstStart) {
+    console.log(AsciiText);
+    configs = await setupConfigs();
+  }
+
   let selectedIndex = await selectAction();
   while (selectedIndex == 99) {
     selectedIndex = await selectAction();
@@ -41,25 +46,29 @@ const main = async () => {
     case 0: {
       const newLabel = await getNewLabel();
       createLabel(configs, newLabel);
+      firstStart = firstStart && false;
       break;
     }
 
     case 1: {
-      console.log('create labels');
+      // console.log('create labels');
       createLabels(configs);
+      firstStart = firstStart && false;
       break;
     }
 
     case 2: {
-      console.log('delete a label');
+      // console.log('delete a label');
       const targetLabel = await getTargetLabel();
       deleteLabel(configs, targetLabel);
+      firstStart = firstStart && false;
       break;
     }
 
     case 3: {
       // console.log('delete all labels');
       deleteLabels(configs);
+      firstStart = firstStart && false;
       break;
     }
     case 4: {
@@ -73,6 +82,7 @@ const main = async () => {
       break;
     }
   }
+  main();
 };
 
 main();
