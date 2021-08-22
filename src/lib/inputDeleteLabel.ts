@@ -2,7 +2,8 @@ import prompts from 'prompts';
 
 import { deleteLabel } from '../constant';
 
-(async () => {
+export const getTargetLabel = async (): Promise<string[]> => {
   const response = await prompts(deleteLabel);
-  console.log(response);
-})();
+  // console.log('resp', response);
+  return [response.name];
+}

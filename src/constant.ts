@@ -37,7 +37,7 @@ export const newLabel = [
 
 export const deleteLabel = {
   type: 'text',
-  name: 'labelColor',
+  name: 'name',
   message: 'Please type label name you want to delete',
 };
 

@@ -3,16 +3,12 @@ import { Octokit } from '@octokit/core';
 import {
   createLabel,
   createLabels,
+  deleteLabel,
   deleteLabels,
-/*
-
-//   deleteLabel,
-*/
 } from './lib/callApi';
-// import { createSingleLabel } from './lib/createSingleLabel';
-// import { deleteSingleLabel } from './lib/deleteSingleLabel';
 import { getGitHubConfigs } from './lib/inputGitHubConfig';
 import { getNewLabel } from './lib/inputNewLabel';
+import { getTargetLabel } from './lib/inputDeleteLabel';
 import { selectAction } from './lib/selectPrompts';
 import { ConfigType } from './types';
 
@@ -53,16 +49,16 @@ const main = async () => {
       createLabels(configs);
       break;
     }
-    /*
+
     case 2: {
       console.log('delete a label');
-      // const targetLabel = deleteSingleLabel();
-      // deleteLabel(octokit, userInfo, targetLabel);
+      const targetLabel = await getTargetLabel();
+      deleteLabel(configs, targetLabel);
       break;
     }
-    */
+
     case 3: {
-      console.log('delete all labels');
+      // console.log('delete all labels');
       deleteLabels(configs);
       break;
     }

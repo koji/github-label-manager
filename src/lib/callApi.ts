@@ -40,17 +40,15 @@ export const createLabels = async (configs: ConfigType) => {
   console.log('Created all labels');
 };
 
-/*
-export const deleteLabel = (octokit: any, userInfo: UserInfoType, labelNames: readonly string[]) => {
+export const deleteLabel = (configs: ConfigType, labelNames: string[]) => {
   labelNames.forEach(async (labelName: string) => {
-    await octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
-      owner: userInfo.owner,
-      repo: userInfo.repo,
+    await configs.octokit.request('DELETE /repos/{owner}/{repo}/labels/{name}', {
+      owner: configs.owner,
+      repo: configs.repo,
       name: labelName,
     });
   });
 };
-*/
 
 // get labels
 const getLabels = async (configs: ConfigType) => {
