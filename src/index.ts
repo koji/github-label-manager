@@ -6,9 +6,10 @@ import {
   deleteLabel,
   deleteLabels,
 } from './lib/callApi';
+import { AsciiText } from './lib/displayAsciiText';
+import { getTargetLabel } from './lib/inputDeleteLabel';
 import { getGitHubConfigs } from './lib/inputGitHubConfig';
 import { getNewLabel } from './lib/inputNewLabel';
-import { getTargetLabel } from './lib/inputDeleteLabel';
 import { selectAction } from './lib/selectPrompts';
 import { ConfigType } from './types';
 
@@ -16,7 +17,7 @@ import { ConfigType } from './types';
 const setupConfigs = async () => {
   const resp = await getGitHubConfigs();
   const octokit = new Octokit({
-    auth: `${resp.token}`,
+    auth: `${resp.octokit}`,
   });
   return {
     octokit,
@@ -25,12 +26,11 @@ const setupConfigs = async () => {
   };
 };
 
-
 // steps
 // first call setupConfigs
 
 const main = async () => {
-  console.log('start');
+  console.log(AsciiText);
   const configs: ConfigType = await setupConfigs();
   let selectedIndex = await selectAction();
   while (selectedIndex == 99) {

@@ -2,7 +2,7 @@
 export const githubConfigs = [
   {
     type: 'text',
-    name: 'token',
+    name: 'octokit',
     message: 'Please type your personal token',
   },
   {
@@ -46,14 +46,13 @@ export const actionSelector = {
   name: 'action',
   message: 'Please select an action',
   choices: [
-      { title: 'create a label', value: 0},
-      { title: 'create multiple labels', value: 1 },
-      { title: 'delete a label', value: 2 },
-      { title: 'delete all labels', value: 3 },
-      { title: 'exit', value: 4 },
+    { title: 'create a label', value: 0 },
+    { title: 'create multiple labels', value: 1 },
+    { title: 'delete a label', value: 2 },
+    { title: 'delete all labels', value: 3 },
+    { title: 'exit', value: 4 },
   ],
 };
-
 
 export const labels =
   // the following labels are based on this post
