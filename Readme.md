@@ -1,6 +1,6 @@
 # github label manager
 
-Simple CLI tool to create/delete labels with GitHub Labels API.  
+Simple CLI tool to create/delete labels with GitHub Labels API.
 
 ### Labels API
 
@@ -82,68 +82,30 @@ $ git clone https://github.com/koji/github-label-manager.git
 $ cd github-label-manager
 
 # use yarn
-$ yarn start
+$ yarn # install packages
+$ yarn build # compile typescript
+$ yarn start # run index.js
 
 # use npm
+$ npm install
+$ npm run build
 $ npm start
+
+# or use ts-node
+$ npx ts-node src/index.ts # this might be slow
 ```
 
 After execute the command, you will need to type some information.
 
-#### create single label
+- GitHub personal token
+- GitHub id
+- Target repo name
+- new label name (when you seslect `create a label`)
+- label name you want to delete (when you seslect `delete a label`)
 
-https://user-images.githubusercontent.com/474225/130164576-80e52b14-d4c3-4cd4-a319-4a34832a6452.mov
+`create labels` is based on `labels` in `src/constant.ts`
 
-#### create multiple labels
-
-https://user-images.githubusercontent.com/474225/130164580-39959f7b-6bdc-4405-97c6-adbedb3dfc1a.mov
-
-```zsh
-$ yarn start
-yarn run v1.22.10
-$ node src/app.js
-
-[1] single label
-[2] multiple labels
-[3] delete label
-[4] delete all labels
-[0] CANCEL
-
-Create a single label or multiple labels from json [1...4 / 0]: 2
-Github token: ****************************************
-Please type your GitHub account koji
-Please type your target repo name github-label-manager
-Created all labels
-201: Created Status: Inactive (Abandoned)
-201: Created Status: Inactive (Invalid)
-201: Created Status: Canceled
-201: Created Effort Effortless
-201: Created Type: Improvement
-201: Created Type: Optimization
-201: Created Priority: ASAP
-201: Created Type: Modification
-201: Created Type: Enhancement
-201: Created Status: Completed
-201: Created Status: Pending
-201: Created Type: Bug Fix
-201: Created Status: In Progress
-201: Created Effort Heavy
-201: Created Status: Inactive (Won't Fix)
-201: Created Effort Light
-201: Created Priority: Medium
-201: Created Effort Painful
-201: Created Priority: Safe
-201: Created Status: Available
-201: Created Priority: Low
-201: Created Effort Normal
-201: Created Feedback Suggestion
-201: Created Feedback Question
-201: Created Feedback Discussion
-201: Created Status: Inactive (Duplicate)
-201: Created Priority: High
-201: Created Type: Security Fix
-✨  Done in 21.52s.
-```
+https://user-images.githubusercontent.com/474225/130368605-b5c6410f-53f6-4ef0-b321-8950edeebf7d.mov
 
 ### Article
 
