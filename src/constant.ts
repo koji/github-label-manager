@@ -1,7 +1,9 @@
+import figlet from 'figlet';
+
 // for github configs
 export const githubConfigs = [
   {
-    type: 'text',
+    type: 'password',
     name: 'octokit',
     message: 'Please type your personal token',
   },
@@ -198,4 +200,19 @@ export const labels =
       color: 'F06293',
       description: 'A suggestion about features',
     },
+    {
+      name: 'Docs',
+      color: '000',
+      description: 'Documentation',
+    },
   ];
+
+export const initialText = `Please input your GitHub info`;
+
+export const AsciiText = figlet.textSync('GitHub Label Manager', {
+  font: 'Small',
+  horizontalLayout: 'default',
+  verticalLayout: 'default',
+  width: 180,
+  whitespaceBreak: true,
+});
