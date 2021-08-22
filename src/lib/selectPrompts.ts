@@ -1,4 +1,5 @@
 import prompts from 'prompts';
+
 import { actionSelector } from '../constant';
 
 export const selectAction = async (): Promise<number> => {
