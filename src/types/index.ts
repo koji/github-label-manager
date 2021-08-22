@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/core';
 export type ImportLabelType = {
   // eslint-disable-next-line functional/prefer-readonly-type
   name: string;
@@ -16,7 +17,8 @@ export type LabelType = ImportLabelType & {
 
 export type CreateLabelResponseType = 201 | 404 | 422;
 
-export type UserInfoType = {
-  owner: string;
-  repo: string;
-}
+export type ConfigType = {
+  readonly octokit: Octokit;
+  readonly owner: string;
+  readonly repo: string;
+};

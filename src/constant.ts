@@ -1,3 +1,59 @@
+// for github configs
+export const githubConfigs = [
+  {
+    type: 'text',
+    name: 'octokit',
+    message: 'Please type your personal token',
+  },
+  {
+    type: 'text',
+    name: 'owner',
+    message: 'Please type your GitHub account',
+  },
+  {
+    type: 'text',
+    name: 'repo',
+    message: 'Please type your target repo name',
+  },
+];
+
+export const newLabel = [
+  {
+    type: 'text',
+    name: 'name',
+    message: 'Please type new label name',
+  },
+  {
+    type: 'text',
+    name: 'color',
+    message: 'Please type label color without "#" ',
+  },
+  {
+    type: 'text',
+    name: 'description',
+    message: 'Please type label description',
+  },
+];
+
+export const deleteLabel = {
+  type: 'text',
+  name: 'name',
+  message: 'Please type label name you want to delete',
+};
+
+export const actionSelector = {
+  type: 'multiselect',
+  name: 'action',
+  message: 'Please select an action',
+  choices: [
+    { title: 'create a label', value: 0 },
+    { title: 'create multiple labels', value: 1 },
+    { title: 'delete a label', value: 2 },
+    { title: 'delete all labels', value: 3 },
+    { title: 'exit', value: 4 },
+  ],
+};
+
 export const labels =
   // the following labels are based on this post
   // https://qiita.com/willow-micro/items/51eeb3efe5b4192a4abd
