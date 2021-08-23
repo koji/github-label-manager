@@ -107,15 +107,15 @@ After execute the command, you will need to type some information.
 https://github.com/koji/github-label-manager/blob/main/src/constant.ts#L59-L208   
 ```js
 {
-      name: 'Type: Bug Fix',
-      color: 'FF8A65',
-      description: 'Fix features that are not working',
-    },
-    {
-      name: 'Type: Enhancement',
-      color: '64B5F7',
-      description: 'Add new features',
-    },
+  name: 'Type: Bug Fix',
+  color: 'FF8A65',
+  description: 'Fix features that are not working',
+},
+{
+  name: 'Type: Enhancement',
+  color: '64B5F7',
+  description: 'Add new features',
+},
 ```
 
 
