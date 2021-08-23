@@ -2,6 +2,8 @@
 
 Simple CLI tool to create/delete labels with GitHub Labels API.
 
+<img width="846" alt="Screen Shot 2021-08-23 at 1 02 53 AM" src="https://user-images.githubusercontent.com/474225/130393065-3f2a6fed-f6a3-4b1b-8e5f-ee4fee43d70f.png">
+
 ### Labels API
 
 https://docs.github.com/en/rest/reference/issues#labels
