@@ -56,6 +56,13 @@ export const actionSelector = {
   ],
 };
 
+export const holdToken = {
+  type: 'confirm',
+  name: 'value',
+  message: 'Do you have a personal token?',
+  initial: true,
+};
+
 export const labels =
   // the following labels are based on this post
   // https://qiita.com/willow-micro/items/51eeb3efe5b4192a4abd
@@ -218,3 +225,5 @@ export const AsciiText = figlet.textSync('GitHub Label Manager', {
 });
 
 export const extraGuideText = `If you don't see action selector, please hit space key.`;
+
+export const linkToPersonalToken = 'https://github.com/settings/tokens';
