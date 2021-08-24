@@ -124,5 +124,5 @@ https://github.com/koji/github-label-manager/blob/main/src/constant.ts#L59-L208
 https://user-images.githubusercontent.com/474225/130368605-b5c6410f-53f6-4ef0-b321-8950edeebf7d.mov
 
 ### Article
-
-https://seantrane.com/posts/logical-colorful-github-labels-18230/
+https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab    
+https://seantrane.com/posts/logical-colorful-github-labels-18230/  
