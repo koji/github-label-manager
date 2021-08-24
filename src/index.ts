@@ -1,12 +1,13 @@
 import { Octokit } from '@octokit/core';
 
-import { AsciiText, initialText } from './constant';
+import { AsciiText, initialText, linkToPersonalToken } from './constant';
 import {
   createLabel,
   createLabels,
   deleteLabel,
   deleteLabels,
 } from './lib/callApi';
+import { getConfirmation } from './lib/confirmToken';
 import { getTargetLabel } from './lib/inputDeleteLabel';
 import { getGitHubConfigs } from './lib/inputGitHubConfig';
 import { getNewLabel } from './lib/inputNewLabel';
@@ -32,6 +33,14 @@ const setupConfigs = async () => {
 // first call setupConfigs
 let configs: ConfigType;
 const main = async () => {
+  const confirmation = await getConfirmation();
+  if (!confirmation) {
+    console.log(
+      `Please go to ${linkToPersonalToken} and generate a personal token!`
+    );
+    return;
+  }
+
   if (firstStart) {
     console.log(AsciiText);
     configs = await setupConfigs();
