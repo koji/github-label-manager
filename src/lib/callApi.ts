@@ -2,8 +2,11 @@
 // create a label/labels
 // delete a label/labels
 
+import chalk from 'chalk';
+
 import { extraGuideText, labels } from '../constant';
 import { ConfigType, CreateLabelResponseType, ImportLabelType } from '../types';
+const log = console.log;
 
 export const createLabel = async (
   configs: ConfigType,
@@ -24,16 +27,16 @@ export const createLabel = async (
 
   switch (status) {
     case 201:
-      console.log(`${resp.status}: Created ${label.name}`);
+      log(chalk.green(`${resp.status}: Created ${label.name}`));
       break;
     case 404:
-      console.log(`${resp.status}: Resource not found`);
+      log(chalk.red(`${resp.status}: Resource not found`));
       break;
     case 422:
-      console.log(`${resp.status}: Validation failed`);
+      log(chalk.red(`${resp.status}: Validation failed`));
       break;
     default:
-      console.log(`${resp.status}: Something wrong`);
+      log(chalk.yellow(`${resp.status}: Something wrong`));
       break;
   }
 };
@@ -42,8 +45,8 @@ export const createLabels = async (configs: ConfigType) => {
   labels.forEach(async (label) => {
     createLabel(configs, label);
   });
-  console.log('Created all labels');
-  console.log(extraGuideText);
+  log('Created all labels');
+  log(extraGuideText);
 };
 
 export const deleteLabel = (
@@ -76,7 +79,7 @@ const getLabels = async (configs: ConfigType): Promise<readonly string[]> => {
     const names = await resp.data.map((label) => label.name);
     return names;
   } else {
-    console.log('something wrong');
+    log(chalk.red('something wrong'));
     return [];
   }
 };
@@ -94,7 +97,7 @@ export const deleteLabels = async (configs: ConfigType) => {
       }
     );
   });
-  console.log('');
-  names.forEach((label: string) => console.log(`deleted ${label}`));
-  console.log(extraGuideText);
+  log('');
+  names.forEach((label: string) => log(chalk.bgGreen(`deleted ${label}`)));
+  log(extraGuideText);
 };

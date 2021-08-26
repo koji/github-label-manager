@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/core';
+import chalk from 'chalk';
 
 import { AsciiText, initialText, linkToPersonalToken } from './constant';
 import {
@@ -13,6 +14,7 @@ import { getGitHubConfigs } from './lib/inputGitHubConfig';
 import { getNewLabel } from './lib/inputNewLabel';
 import { selectAction } from './lib/selectPrompts';
 import { ConfigType } from './types';
+const log = console.log;
 
 let firstStart = true;
 // set up configs to access GitHub repo
@@ -35,14 +37,16 @@ let configs: ConfigType;
 const main = async () => {
   const confirmation = await getConfirmation();
   if (!confirmation) {
-    console.log(
-      `Please go to ${linkToPersonalToken} and generate a personal token!`
+    log(
+      chalk.redBright(
+        `Please go to ${linkToPersonalToken} and generate a personal token!`
+      )
     );
     return;
   }
 
   if (firstStart) {
-    console.log(AsciiText);
+    log(AsciiText);
     configs = await setupConfigs();
   }
 
