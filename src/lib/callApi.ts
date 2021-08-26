@@ -46,7 +46,7 @@ export const createLabels = async (configs: ConfigType) => {
     createLabel(configs, label);
   });
   log('Created all labels');
-  log(extraGuideText);
+  log(chalk.bgBlueBright(extraGuideText));
 };
 
 export const deleteLabel = (
@@ -99,5 +99,5 @@ export const deleteLabels = async (configs: ConfigType) => {
   });
   log('');
   names.forEach((label: string) => log(chalk.bgGreen(`deleted ${label}`)));
-  log(extraGuideText);
+  log(chalk.bgBlueBright(extraGuideText));
 };
