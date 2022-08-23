@@ -86,7 +86,7 @@ const main = async () => {
     }
     case 4: {
       console.log('exit');
-      process.exit(1);
+      process.exit(0);
       // deleteLabels(octokit, userInfo);
       break;
     }

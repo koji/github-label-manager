@@ -4,8 +4,10 @@
 
 import chalk from 'chalk';
 
-import { extraGuideText, labels } from '../constant';
+import { extraGuideText } from '../constant';
+import lableJson from '../label.json';
 import { ConfigType, CreateLabelResponseType, ImportLabelType } from '../types';
+
 const log = console.log;
 
 export const createLabel = async (
@@ -42,7 +44,7 @@ export const createLabel = async (
 };
 
 export const createLabels = async (configs: ConfigType) => {
-  labels.forEach(async (label) => {
+  lableJson.forEach(async (label) => {
     createLabel(configs, label);
   });
   log('Created all labels');
