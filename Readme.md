@@ -107,24 +107,24 @@ After execute the command, you will need to type some information.
 - new label name (when you seslect `create a label`)
 - label name you want to delete (when you seslect `delete a label`)
 
-`create labels` is based on `labels` in `src/constant.ts`   
-https://github.com/koji/github-label-manager/blob/main/src/constant.ts#L59-L208   
-```js
+`create labels` is based on `label.json` in `src/label.json`
+
+```json
 {
-  name: 'Type: Bug Fix',
-  color: 'FF8A65',
-  description: 'Fix features that are not working',
+  "name": "Type: Bug Fix",
+  "color": "FF8A65",
+  "description": "Fix features that are not working",
 },
 {
-  name: 'Type: Enhancement',
-  color: '64B5F7',
-  description: 'Add new features',
+  "name": "Type: Enhancement",
+  "color": "64B5F7",
+  "description": "Add new features",
 },
 ```
-
 
 https://user-images.githubusercontent.com/474225/130368605-b5c6410f-53f6-4ef0-b321-8950edeebf7d.mov
 
 ### Article
-https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab    
-https://seantrane.com/posts/logical-colorful-github-labels-18230/  
+
+https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab  
+https://seantrane.com/posts/logical-colorful-github-labels-18230/
