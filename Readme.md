@@ -1,3 +1,5 @@
+**Currently working on making this scripts into a CLI tool**
+
 # github label manager
 
 Simple CLI tool to create/delete labels with GitHub Labels API.
