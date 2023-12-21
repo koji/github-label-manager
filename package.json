@@ -1,6 +1,6 @@
 {
   "name": "github-label-manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "create and delete github labels with Labels API",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -37,26 +37,26 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@octokit/core": "^3.5.1",
+    "@octokit/core": "^3.6.0",
     "chalk": "^4.1.2",
-    "figlet": "^1.5.2",
-    "prompts": "^2.4.1"
+    "figlet": "^1.7.0",
+    "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@types/figlet": "^1.5.4",
-    "@types/node": "^16.6.2",
-    "@typescript-eslint/eslint-plugin": "^4.0.1",
-    "@typescript-eslint/parser": "^4.0.1",
-    "eslint": "^7.8.0",
-    "eslint-config-prettier": "^6.11.0",
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^16.18.68",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-functional": "^3.0.2",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-functional": "^3.7.2",
+    "eslint-plugin-import": "^2.29.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.1.1",
-    "standard-version": "^9.0.0",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.2"
+    "prettier": "^2.8.8",
+    "standard-version": "^9.5.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.9.5"
   },
   "files": [
     "build/main",
