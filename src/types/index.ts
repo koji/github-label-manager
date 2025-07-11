@@ -1,10 +1,7 @@
 import { Octokit } from '@octokit/core';
 export type ImportLabelType = {
-  // eslint-disable-next-line functional/prefer-readonly-type
   name: string;
-  // eslint-disable-next-line functional/prefer-readonly-type
   color?: string;
-  // eslint-disable-next-line functional/prefer-readonly-type
   description?: string;
 };
 

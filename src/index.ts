@@ -39,8 +39,8 @@ const main = async () => {
   if (!confirmation) {
     log(
       chalk.redBright(
-        `Please go to ${linkToPersonalToken} and generate a personal token!`
-      )
+        `Please go to ${linkToPersonalToken} and generate a personal token!`,
+      ),
     );
     return;
   }

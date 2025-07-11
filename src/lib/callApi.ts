@@ -10,7 +10,7 @@ const log = console.log;
 
 export const createLabel = async (
   configs: ConfigType,
-  label: ImportLabelType
+  label: ImportLabelType,
 ) => {
   const resp = await configs.octokit.request(
     'POST /repos/{owner}/{repo}/labels',
@@ -20,7 +20,7 @@ export const createLabel = async (
       name: label.name,
       color: label.color,
       description: label.description,
-    }
+    },
   );
 
   const status = resp.status as CreateLabelResponseType;
@@ -51,7 +51,7 @@ export const createLabels = async (configs: ConfigType) => {
 
 export const deleteLabel = (
   configs: ConfigType,
-  labelNames: readonly string[]
+  labelNames: readonly string[],
 ) => {
   labelNames.forEach(async (labelName: string) => {
     await configs.octokit.request(
@@ -60,7 +60,7 @@ export const deleteLabel = (
         owner: configs.owner,
         repo: configs.repo,
         name: labelName,
-      }
+      },
     );
   });
 };
@@ -72,7 +72,7 @@ const getLabels = async (configs: ConfigType): Promise<readonly string[]> => {
     {
       owner: configs.owner,
       repo: configs.repo,
-    }
+    },
   );
 
   if (resp.status === 200) {
@@ -94,7 +94,7 @@ export const deleteLabels = async (configs: ConfigType) => {
         owner: configs.owner,
         repo: configs.repo,
         name: name,
-      }
+      },
     );
   });
   log('');
