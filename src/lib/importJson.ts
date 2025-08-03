@@ -96,7 +96,7 @@ export const importLabelsFromJson = async (
             // Create valid label object
             const validLabel: ImportLabelType = {
                 name: (labelObj.name as string).trim(),
-                ...(labelObj.color && { color: (labelObj.color as string).trim() }),
+                ...(labelObj.color !== undefined && { color: (labelObj.color as string).trim() }),
                 ...(labelObj.description !== undefined && { description: labelObj.description as string }),
             };
 
