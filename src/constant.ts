@@ -43,6 +43,12 @@ export const deleteLabel = {
   message: 'Please type label name you want to delete',
 };
 
+export const jsonFilePath = {
+  type: 'text',
+  name: 'filePath',
+  message: 'Please type the path to your JSON file',
+};
+
 export const actionSelector = {
   type: 'multiselect',
   name: 'action',
@@ -52,7 +58,8 @@ export const actionSelector = {
     { title: 'create multiple labels', value: 1 },
     { title: 'delete a label', value: 2 },
     { title: 'delete all labels', value: 3 },
-    { title: 'exit', value: 4 },
+    { title: 'import JSON', value: 4 },
+    { title: 'exit', value: 5 },
   ],
 };
 

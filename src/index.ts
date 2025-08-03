@@ -9,8 +9,10 @@ import {
   deleteLabels,
 } from './lib/callApi';
 import { getConfirmation } from './lib/confirmToken';
+import { importLabelsFromJson } from './lib/importJson';
 import { getTargetLabel } from './lib/inputDeleteLabel';
 import { getGitHubConfigs } from './lib/inputGitHubConfig';
+import { getJsonFilePath } from './lib/inputJsonFile';
 import { getNewLabel } from './lib/inputNewLabel';
 import { selectAction } from './lib/selectPrompts';
 import { ConfigType } from './types';
@@ -84,7 +86,23 @@ const main = async () => {
       firstStart = firstStart && false;
       break;
     }
+
     case 4: {
+      try {
+        const filePath = await getJsonFilePath();
+        if (filePath) {
+          await importLabelsFromJson(configs, filePath);
+        } else {
+          log(chalk.yellow('No file path provided. Returning to main menu.'));
+        }
+      } catch (error) {
+        log(chalk.red(`Error during JSON import: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      }
+      firstStart = firstStart && false;
+      break;
+    }
+
+    case 5: {
       console.log('exit');
       process.exit(0);
       // deleteLabels(octokit, userInfo);
