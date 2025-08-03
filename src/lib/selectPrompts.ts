@@ -1,6 +1,6 @@
 import prompts from 'prompts';
 
-import { actionSelector } from '../constant';
+import { actionSelector } from '../constant.js';
 
 export const selectAction = async (): Promise<number> => {
   const response = await prompts(actionSelector);

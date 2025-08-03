@@ -1,7 +1,7 @@
 import prompts from 'prompts';
 
-import { githubConfigs } from '../constant';
-import { ConfigType } from '../types';
+import { githubConfigs } from '../constant.js';
+import { ConfigType } from '../types/index.js';
 
 export const getGitHubConfigs = async (): Promise<ConfigType> => {
   const response = await prompts(githubConfigs);

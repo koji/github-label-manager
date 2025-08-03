@@ -2,9 +2,9 @@ import * as fs from 'fs';
 
 import chalk from 'chalk';
 
-import { ConfigType, ImportLabelType } from '../types';
+import { ConfigType, ImportLabelType } from '../types/index.js';
 
-import { createLabel } from './callApi';
+import { createLabel } from './callApi.js';
 
 const log = console.log;
 

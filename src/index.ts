@@ -1,21 +1,21 @@
 import { Octokit } from '@octokit/core';
 import chalk from 'chalk';
 
-import { AsciiText, initialText, linkToPersonalToken } from './constant';
+import { AsciiText, initialText, linkToPersonalToken } from './constant.js';
 import {
   createLabel,
   createLabels,
   deleteLabel,
   deleteLabels,
-} from './lib/callApi';
-import { getConfirmation } from './lib/confirmToken';
-import { importLabelsFromJson } from './lib/importJson';
-import { getTargetLabel } from './lib/inputDeleteLabel';
-import { getGitHubConfigs } from './lib/inputGitHubConfig';
-import { getJsonFilePath } from './lib/inputJsonFile';
-import { getNewLabel } from './lib/inputNewLabel';
-import { selectAction } from './lib/selectPrompts';
-import { ConfigType } from './types';
+} from './lib/callApi.js';
+import { getConfirmation } from './lib/confirmToken.js';
+import { importLabelsFromJson } from './lib/importJson.js';
+import { getTargetLabel } from './lib/inputDeleteLabel.js';
+import { getGitHubConfigs } from './lib/inputGitHubConfig.js';
+import { getJsonFilePath } from './lib/inputJsonFile.js';
+import { getNewLabel } from './lib/inputNewLabel.js';
+import { selectAction } from './lib/selectPrompts.js';
+import { ConfigType } from './types/index.js';
 const log = console.log;
 
 let firstStart = true;
