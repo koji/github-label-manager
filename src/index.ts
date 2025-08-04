@@ -1,4 +1,3 @@
-import { Octokit } from '@octokit/core';
 import chalk from 'chalk';
 
 import { AsciiText, initialText, linkToPersonalToken } from './constant.js';
@@ -14,23 +13,93 @@ import { getTargetLabel } from './lib/inputDeleteLabel.js';
 import { getGitHubConfigs } from './lib/inputGitHubConfig.js';
 import { getJsonFilePath } from './lib/inputJsonFile.js';
 import { getNewLabel } from './lib/inputNewLabel.js';
+import { CryptoUtils } from './lib/cryptoUtils.js';
 import { selectAction } from './lib/selectPrompts.js';
+import { ConfigManager } from './lib/configManager.js';
 import { ConfigType } from './types/index.js';
 const log = console.log;
 
 let firstStart = true;
+const configManager = new ConfigManager();
+
 // set up configs to access GitHub repo
 const setupConfigs = async () => {
   console.log(initialText);
-  const resp = await getGitHubConfigs();
-  const octokit = new Octokit({
-    auth: `${resp.octokit}`,
-  });
-  return {
-    octokit,
-    owner: resp.owner,
-    repo: resp.repo,
-  };
+
+  // Migrate existing configuration to encrypted format if needed
+  if (firstStart) {
+    await configManager.migrateToEncrypted();
+  }
+
+  // Get configuration (either from saved config or prompts)
+  const config = await getGitHubConfigs();
+
+  // Validate configuration before use
+  if (!config.octokit || !config.owner || !config.repo) {
+    throw new Error('Invalid configuration: missing required fields');
+  }
+
+  // Test the configuration by making a simple API call
+  try {
+    await config.octokit.request('GET /user');
+  } catch (error) {
+    // If the token is invalid, clear saved config and prompt again
+    if (config.fromSavedConfig) {
+      console.log(chalk.yellow('Saved credentials are invalid. Please provide new credentials.'));
+      await configManager.clearConfig();
+      return setupConfigs(); // Retry with fresh prompts
+    }
+    throw new Error(`GitHub API authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  return config;
+};
+
+// Display current settings
+const displaySettings = async () => {
+  log(chalk.cyan('\n=== Current Settings ==='));
+
+  const configPath = configManager.getConfigPath();
+  log(chalk.blue(`Configuration file path: ${configPath}`));
+
+  if (!configManager.configExists()) {
+    log(chalk.yellow('No configuration file exists. You will be prompted for credentials on next action.'));
+    return;
+  }
+
+  try {
+    const config = await configManager.loadConfig();
+
+    if (!config) {
+      log(chalk.yellow('Configuration file exists but contains invalid data.'));
+      return;
+    }
+
+    log(chalk.green(`GitHub account: ${config.owner}`));
+
+    if (config.token) {
+      const isEncrypted = CryptoUtils.isTokenEncrypted(config.token);
+      const tokenStatus = isEncrypted ? '✓ Saved and encrypted' : '✓ Saved (plain text)';
+      log(chalk.green(`Personal token: ${tokenStatus}`));
+
+      // Show obfuscated version of the actual token (decrypted)
+      const actualToken = CryptoUtils.decryptToken(config.token);
+      const obfuscatedToken = CryptoUtils.obfuscateToken(actualToken);
+      log(chalk.blue(`Token preview: ${obfuscatedToken}`));
+    } else {
+      log(chalk.red('Personal token: ✗ Not saved'));
+    }
+
+    if (config.lastUpdated) {
+      const lastUpdated = new Date(config.lastUpdated);
+      log(chalk.blue(`Last updated: ${lastUpdated.toLocaleString()}`));
+    }
+
+  } catch (error) {
+    log(chalk.red(`Error reading configuration: ${error instanceof Error ? error.message : 'Unknown error'}`));
+  }
+
+  log(chalk.cyan('========================\n'));
 };
 
 // steps
@@ -49,7 +118,15 @@ const main = async () => {
 
   if (firstStart) {
     log(AsciiText);
-    configs = await setupConfigs();
+    try {
+      configs = await setupConfigs();
+      if (configs.fromSavedConfig) {
+        log(chalk.green(`Using saved configuration for ${configs.owner}`));
+      }
+    } catch (error) {
+      log(chalk.red(`Configuration error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      return;
+    }
   }
 
   let selectedIndex = await selectAction();
@@ -103,6 +180,12 @@ const main = async () => {
     }
 
     case 5: {
+      await displaySettings();
+      firstStart = firstStart && false;
+      break;
+    }
+
+    case 6: {
       console.log('exit');
       process.exit(0);
       // deleteLabels(octokit, userInfo);

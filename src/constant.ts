@@ -59,7 +59,8 @@ export const actionSelector = {
     { title: 'delete a label', value: 2 },
     { title: 'delete all labels', value: 3 },
     { title: 'import JSON', value: 4 },
-    { title: 'exit', value: 5 },
+    { title: 'Display your settings', value: 5 },
+    { title: 'exit', value: 6 },
   ],
 };
 
