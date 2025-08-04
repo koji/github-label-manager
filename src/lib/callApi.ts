@@ -4,8 +4,8 @@
 
 import chalk from 'chalk';
 
-import { extraGuideText, labels } from '../constant';
-import { ConfigType, CreateLabelResponseType, ImportLabelType } from '../types';
+import { extraGuideText, labels } from '../constant.js';
+import { ConfigType, CreateLabelResponseType, ImportLabelType } from '../types/index.js';
 const log = console.log;
 
 export const createLabel = async (
