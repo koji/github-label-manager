@@ -14,7 +14,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
   let validationResult: any = {
     config: null,
     shouldPromptForCredentials: true,
-    preservedData: undefined
+    preservedData: undefined,
   };
   try {
     const result = await configManager.loadValidatedConfig();
@@ -27,7 +27,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
     validationResult = {
       config: null,
       shouldPromptForCredentials: true,
-      preservedData: undefined
+      preservedData: undefined,
     };
   }
 
