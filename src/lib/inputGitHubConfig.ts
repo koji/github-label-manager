@@ -1,9 +1,10 @@
-import prompts from 'prompts';
 import { Octokit } from '@octokit/core';
+import prompts from 'prompts';
 
 import { githubConfigs } from '../constant.js';
 import { ConfigType } from '../types/index.js';
-import { ConfigManager, ConfigError } from './configManager.js';
+
+import { ConfigError, ConfigManager } from './configManager.js';
 
 export const getGitHubConfigs = async (): Promise<ConfigType> => {
   const configManager = new ConfigManager();
@@ -12,7 +13,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
   let validationResult;
   try {
     validationResult = await configManager.loadValidatedConfig();
-  } catch (error) {
+  } catch {
     // Configuration loading errors are already handled and logged in ConfigManager
     // We just continue with prompting for new credentials
     validationResult = { config: null, shouldPromptForCredentials: true };
@@ -41,7 +42,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
   }
 
   // No saved config or invalid config, prompt for credentials
-  let promptConfig = [...githubConfigs];
+  const promptConfig = [...githubConfigs];
 
   // If we have preserved data (like a valid owner), pre-fill it
   if (validationResult.preservedData?.owner) {

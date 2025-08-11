@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes, createHash } from 'crypto';
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { homedir } from 'os';
 
 /**
@@ -42,7 +42,7 @@ export class CryptoUtils {
 
             // Prepend IV to encrypted data
             return iv.toString(this.ENCODING) + ':' + encrypted;
-        } catch (error) {
+        } catch {
             // If encryption fails, return the original token
             // This ensures backward compatibility
             console.warn('⚠️  Token encryption failed, storing in plain text');
@@ -77,7 +77,7 @@ export class CryptoUtils {
             decrypted += decipher.final('utf8');
 
             return decrypted;
-        } catch (error) {
+        } catch {
             // If decryption fails, return the original string
             // This handles cases where the token might not be encrypted
             console.warn('⚠️  Token decryption failed, using as plain text');

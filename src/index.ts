@@ -7,15 +7,15 @@ import {
   deleteLabel,
   deleteLabels,
 } from './lib/callApi.js';
+import { ConfigManager } from './lib/configManager.js';
 import { getConfirmation } from './lib/confirmToken.js';
+import { CryptoUtils } from './lib/cryptoUtils.js';
 import { importLabelsFromJson } from './lib/importJson.js';
 import { getTargetLabel } from './lib/inputDeleteLabel.js';
 import { getGitHubConfigs } from './lib/inputGitHubConfig.js';
 import { getJsonFilePath } from './lib/inputJsonFile.js';
 import { getNewLabel } from './lib/inputNewLabel.js';
-import { CryptoUtils } from './lib/cryptoUtils.js';
 import { selectAction } from './lib/selectPrompts.js';
-import { ConfigManager } from './lib/configManager.js';
 import { ConfigType } from './types/index.js';
 const log = console.log;
 
@@ -188,9 +188,8 @@ const main = async () => {
     case 6: {
       console.log('exit');
       process.exit(0);
-      // deleteLabels(octokit, userInfo);
-      break;
     }
+    // eslint-disable-next-line no-fallthrough
     default: {
       console.log('invalid input');
       break;

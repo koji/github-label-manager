@@ -1,7 +1,9 @@
-import { promises as fs } from 'fs';
-import { join } from 'path';
+import { existsSync, promises as fs } from 'fs';
 import { homedir } from 'os';
+import { join } from 'path';
+
 import { StoredConfigType } from '../types';
+
 import { CryptoUtils } from './cryptoUtils';
 
 export enum ConfigErrorType {
@@ -77,7 +79,7 @@ export class ConfigManager {
                 );
             }
 
-            let config: any;
+            let config: StoredConfigType;
             try {
                 config = JSON.parse(data);
             } catch (parseError) {
@@ -206,7 +208,7 @@ export class ConfigManager {
             if (await this.fileExists(this.fallbackConfigPath)) {
                 try {
                     await fs.unlink(this.fallbackConfigPath);
-                } catch (unlinkError) {
+                } catch {
                     console.warn(`⚠️  Could not remove old fallback configuration file: ${this.fallbackConfigPath}`);
                 }
             }
@@ -267,7 +269,7 @@ export class ConfigManager {
      */
     configExists(): boolean {
         try {
-            return require('fs').existsSync(this.configPath) || require('fs').existsSync(this.fallbackConfigPath);
+            return existsSync(this.configPath) || existsSync(this.fallbackConfigPath);
         } catch {
             return false;
         }
@@ -277,10 +279,10 @@ export class ConfigManager {
      * Get the path to the configuration file
      */
     getConfigPath(): string {
-        if (require('fs').existsSync(this.configPath)) {
+        if (existsSync(this.configPath)) {
             return this.configPath;
         }
-        if (require('fs').existsSync(this.fallbackConfigPath)) {
+        if (existsSync(this.fallbackConfigPath)) {
             return this.fallbackConfigPath;
         }
         return this.configPath; // Return primary path as default
@@ -289,7 +291,7 @@ export class ConfigManager {
     /**
      * Validate configuration data format
      */
-    async validateConfig(config: any): Promise<boolean> {
+    async validateConfig(config: StoredConfigType): Promise<boolean> {
         if (!config || typeof config !== 'object') {
             return false;
         }
@@ -345,7 +347,7 @@ export class ConfigManager {
             }
 
             return { isValid: true };
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Handle different types of API errors
             if (error.status === 401) {
                 return {
