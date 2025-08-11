@@ -53,7 +53,8 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
       promptConfig[ownerPromptIndex] = {
         ...promptConfig[ownerPromptIndex],
         initial: validationResult.preservedData.owner,
-      };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any; // Type assertion for prompts with initial value
     }
   }
 

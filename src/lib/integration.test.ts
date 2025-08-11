@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StoredConfigType } from '../types';
@@ -309,7 +308,6 @@ describe('Integration Tests', () => {
     it('should handle config validation in setupConfigs', async () => {
       const prompts = (await import('prompts')).default;
       const { getGitHubConfigs } = await import('./inputGitHubConfig');
-      const { Octokit } = await import('@octokit/core');
       const { ConfigManager } = await import('./configManager');
 
       const mockConfigManager = new ConfigManager();

@@ -12,7 +12,7 @@ import { homedir } from 'os';
 export class CryptoUtils {
   private static readonly ALGORITHM = 'aes-256-cbc';
   private static readonly ENCODING: BufferEncoding = 'hex';
-  private static readonly KEY_LENGTH = 32; // 256 bits
+
 
   /**
    * Generate a machine-specific key based on system information
