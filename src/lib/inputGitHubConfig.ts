@@ -10,13 +10,25 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
   const configManager = new ConfigManager();
 
   // Try to load and validate existing configuration
-  let validationResult;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let validationResult: any = {
+    config: null,
+    shouldPromptForCredentials: true,
+    preservedData: undefined
+  };
   try {
-    validationResult = await configManager.loadValidatedConfig();
+    const result = await configManager.loadValidatedConfig();
+    if (result) {
+      validationResult = result;
+    }
   } catch {
     // Configuration loading errors are already handled and logged in ConfigManager
     // We just continue with prompting for new credentials
-    validationResult = { config: null, shouldPromptForCredentials: true };
+    validationResult = {
+      config: null,
+      shouldPromptForCredentials: true,
+      preservedData: undefined
+    };
   }
 
   if (validationResult.config && !validationResult.shouldPromptForCredentials) {
