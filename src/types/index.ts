@@ -18,4 +18,11 @@ export type ConfigType = {
   readonly octokit: Octokit;
   readonly owner: string;
   readonly repo: string;
+  readonly fromSavedConfig?: boolean;
+};
+
+export type StoredConfigType = {
+  token: string;
+  owner: string;
+  lastUpdated: string;
 };

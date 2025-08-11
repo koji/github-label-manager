@@ -1,8 +1,6 @@
-**Currently working on making this scripts into a CLI tool**
+# GitHub Label Manager
 
-# github label manager
-
-Simple CLI tool to create/delete labels with GitHub Labels API.
+A simple CLI tool to create/delete labels with GitHub Labels API. Now available as a global npm package with persistent configuration storage.
 
 <img width="846" alt="Screen Shot 2021-08-23 at 1 02 53 AM" src="https://user-images.githubusercontent.com/474225/130393065-3f2a6fed-f6a3-4b1b-8e5f-ee4fee43d70f.png">
 
@@ -27,28 +25,87 @@ https://docs.github.com/en/rest/reference/issues#labels
 }
 ```
 
-### What this script can do is the below.
+## Installation
+
+Install globally via npm:
+
+```bash
+npm install -g github-label-manager
+```
+
+Or use with npx (no installation required):
+
+```bash
+npx github-label-manager
+```
+
+## Features
+
+This tool provides the following functionality:
 
 1. Create a single label on a specific repo
 2. Create multiple labels on a specific repo
 3. Delete a single label from a specific repo
 4. Delete all labels from a specific repo
+5. Import labels from JSON file
+6. **Display your saved settings** - View your stored GitHub configuration
+7. **Persistent configuration** - Save your GitHub token and username for future use
 
-### Requirement: Personal Token about repo
+## Usage
 
-You can generate a token [here](https://github.com/settings/tokens).
+After installation, run the tool from anywhere:
 
-### What you will need to input
+```bash
+github-label-manager
+```
 
-1. Operation  
-   0: Cancel (terminate the process)  
-   1: Create a single label on a specific repo  
-   2: Create multiple labels on a specific repo  
-   3: Delete a single label from a specific repo  
-   4: Delete all labels from a specific repo
-2. Token
-3. Your GitHub Id
-4. Target repo name
+Or use the short alias:
+
+```bash
+glm
+```
+
+### First Time Setup
+
+On your first run, you'll be prompted to enter:
+- **GitHub Personal Token** - Generate one [here](https://github.com/settings/tokens) with `repo` scope
+- **GitHub Username** - Your GitHub account name
+
+These credentials will be securely saved and reused for future sessions.
+
+### Menu Options
+
+1. **Create a single label on a specific repo**
+2. **Create multiple labels on a specific repo** 
+3. **Delete a single label from a specific repo**
+4. **Delete all labels from a specific repo**
+5. **Import labels from JSON file**
+6. **Display your settings** - View your saved configuration
+7. **Exit**
+
+### Settings Management
+
+The tool now includes persistent configuration storage with enhanced security:
+
+- **Automatic saving**: Your GitHub token and username are saved after first use
+- **Settings display**: Use option 6 to view your current configuration
+- **Secure storage**: Configuration is stored in `~/.config/github-label-manager/config.json`
+- **Token encryption**: Your personal token is automatically encrypted using machine-specific keys
+- **Automatic migration**: Existing plain text configurations are automatically upgraded to encrypted format
+- **Token security**: Your personal token is never displayed in plain text, only an obfuscated preview is shown
+
+### Security Features
+
+**Token Encryption**: 
+- All GitHub personal tokens are automatically encrypted before being saved to disk
+- Encryption uses machine-specific keys derived from your system information
+- Existing plain text configurations are automatically migrated to encrypted format on first run
+- Even if someone gains access to your configuration file, the token remains protected
+
+**Privacy Protection**:
+- Tokens are never displayed in plain text in the interface
+- Only an obfuscated preview (e.g., `ghp_****...****3456`) is shown in settings
+- The settings display shows whether your token is encrypted or in plain text format
 
 If you want to create/delete a single label, you need to type the followings.
 
@@ -79,43 +136,55 @@ module.exports = Object.freeze([
   },
 ```
 
-## How to use this
+## Quick Start
 
-clone this repo and run `app.js`
+1. Install the package globally:
+   ```bash
+   npm install -g github-label-manager
+   ```
 
-```zsh
-$ git clone https://github.com/koji/github-label-manager.git
-$ cd github-label-manager
+2. Run the tool:
+   ```bash
+   github-label-manager
+   ```
 
-# use yarn
-$ yarn # install packages
-$ yarn build # compile typescript
-$ yarn start # run index.js
+3. On first run, enter your GitHub credentials when prompted
 
-# use pnpm
-$ pnpm install
-$ pnpm run build
-$ pnpm start
+4. Select your desired operation from the menu
 
-# use npm
-$ npm install
-$ npm run build
-$ npm start
+5. Follow the prompts to manage your repository labels
 
-# or use ts-node
-$ npx ts-node src/index.ts # this might be slow
+### Example Usage
+
+```bash
+# Install globally
+npm install -g github-label-manager
+
+# Run the tool
+github-label-manager
+
+# Or use the short alias
+glm
+
+# Or run without installing
+npx github-label-manager
 ```
 
-After execute the command, you will need to type some information.
+## Development
 
-- GitHub personal token
-- GitHub id
-- Target repo name
-- new label name (when you seslect `create a label`)
-- label name you want to delete (when you seslect `delete a label`)
+If you want to contribute or run from source:
 
-`create labels` is based on `labels` in `src/constant.ts`  
-https://github.com/koji/github-label-manager/blob/main/src/constant.ts#L59-L208
+```bash
+git clone https://github.com/koji/github-label-manager.git
+cd github-label-manager
+npm install
+npm run build
+npm start
+```
+
+### Predefined Labels
+
+The "Create multiple labels" option uses predefined labels from `src/constant.ts`. These include common labels for project management:
 
 ```js
 {
@@ -128,11 +197,52 @@ https://github.com/koji/github-label-manager/blob/main/src/constant.ts#L59-L208
   color: '64B5F7',
   description: 'Add new features',
 },
+// ... and many more
 ```
+
+## Configuration
+
+### Configuration File Location
+
+Your settings are stored in:
+- **Primary**: `~/.config/github-label-manager/config.json`
+- **Fallback**: `~/.github-label-manager-config.json`
+
+### Viewing Your Settings
+
+Use the "Display your settings" menu option to:
+- See your configuration file path
+- View your stored GitHub username
+- Check if a token is saved (without revealing the actual token)
+- See when your configuration was last updated
+
+### Clearing Configuration
+
+If you need to reset your configuration, you can:
+1. Delete the configuration file manually
+2. The tool will prompt for new credentials on the next run
+
+## Troubleshooting
+
+### Invalid Token Error
+If you see authentication errors:
+1. Check that your token has the correct `repo` scope
+2. Verify the token hasn't expired
+3. The tool will automatically prompt for a new token if validation fails
+
+### Permission Issues
+If you encounter file permission errors:
+- Ensure you have write access to your home directory
+- The tool will attempt to use fallback locations if needed
+
+## Requirements
+
+- Node.js 10 or higher
+- GitHub Personal Access Token with `repo` scope
 
 https://user-images.githubusercontent.com/474225/130368605-b5c6410f-53f6-4ef0-b321-8950edeebf7d.mov
 
-### Article
+## Articles
 
-https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab  
-https://seantrane.com/posts/logical-colorful-github-labels-18230/
+- [Create GitHub Labels from Terminal](https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab)
+- [Logical Colorful GitHub Labels](https://seantrane.com/posts/logical-colorful-github-labels-18230/)

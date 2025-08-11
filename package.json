@@ -2,9 +2,11 @@
   "name": "github-label-manager",
   "version": "0.0.2",
   "description": "create and delete github labels with Labels API",
-  "main": "build/main/index.js",
-  "typings": "build/main/index.d.ts",
-  "module": "build/module/index.js",
+  "main": "dist/index.cjs",
+  "bin": {
+    "github-label-manager": "./dist/index.cjs",
+    "glm": "./dist/index.cjs"
+  },
   "repository": "https://github.com/koji/github-label-manager",
   "license": "MIT",
   "keywords": [
@@ -14,14 +16,16 @@
     "labels"
   ],
   "scripts": {
-    "start": "node build/main/index.js",
-    "build": "run-p build:*",
-    "build:main": "tsc -p tsconfig.json",
-    "build:module": "tsc -p tsconfig.module.json",
+    "start": "node dist/index.cjs",
+    "build": "vite build",
+    "dev": "vite build --watch",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",
-    "test": "run-s build test:*",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "test:lint": "eslint src --ext .ts",
     "test:prettier": "prettier \"src/**/*.ts\" --list-different",
     "check-cli": "run-s test diff-integration-tests check-integration-tests",
@@ -56,16 +60,15 @@
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.36.0"
+    "typescript-eslint": "^8.36.0",
+    "vite": "^5.4.19",
+    "vitest": "^1.6.0",
+    "@vitest/ui": "^1.6.0"
   },
   "files": [
-    "build/main",
-    "build/module",
-    "!**/*.spec.*",
-    "!**/*.json",
-    "CHANGELOG.md",
-    "LICENSE",
-    "README.md"
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
   ],
   "prettier": {
     "singleQuote": true
