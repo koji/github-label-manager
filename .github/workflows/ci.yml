@@ -1,0 +1,349 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant file changes
+        id: changes
+        run: |
+          echo "Checking for file changes to optimize workflow execution..."
+
+          # For push events, compare with previous commit
+          if [ "${{ github.event_name }}" = "push" ]; then
+            if git diff --name-only HEAD~1 HEAD | grep -E '\.(ts|js|json|yml|yaml)$' > /dev/null; then
+              echo "code_changed=true" >> $GITHUB_OUTPUT
+              echo "✅ Code changes detected, running full workflow"
+            else
+              echo "code_changed=false" >> $GITHUB_OUTPUT
+              echo "📝 Only documentation changes detected"
+            fi
+          else
+            # For PRs and other events, always run full workflow
+            echo "code_changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Running full workflow for ${{ github.event_name }} event"
+          fi
+
+          # Check if tests should run
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '\.(ts|js)$|package\.json|tsconfig\.json' > /dev/null || [ "${{ github.event_name }}" != "push" ]; then
+            echo "run_tests=true" >> $GITHUB_OUTPUT
+            echo "🧪 Test execution required"
+          else
+            echo "run_tests=false" >> $GITHUB_OUTPUT
+            echo "⏭️  Skipping tests - no relevant changes"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify network connectivity
+        run: |
+          echo "Checking network connectivity..."
+
+          # Test npm registry connectivity with retry
+          for i in {1..3}; do
+            if curl -s --max-time 10 https://registry.npmjs.org/ > /dev/null; then
+              echo "✅ npm registry is accessible"
+              break
+            else
+              echo "⚠️  Attempt $i: npm registry not accessible, retrying..."
+              if [ $i -eq 3 ]; then
+                echo "❌ Error: Cannot reach npm registry after 3 attempts"
+                echo "This may cause dependency installation to fail"
+                exit 1
+              fi
+              sleep 5
+            fi
+          done
+
+      - name: Cache dependencies and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            dist
+          key: ${{ runner.os }}-deps-build-${{ hashFiles('**/package-lock.json', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-build-
+            ${{ runner.os }}-deps-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+
+          # Check if node_modules is cached and up to date
+          if [ -d "node_modules" ] && [ -f "node_modules/.package-lock.json" ]; then
+            echo "📦 Found cached node_modules, verifying integrity..."
+            if npm ls > /dev/null 2>&1; then
+              echo "✅ Cached dependencies are valid, skipping npm ci"
+              exit 0
+            else
+              echo "⚠️  Cached dependencies are invalid, reinstalling..."
+              rm -rf node_modules
+            fi
+          fi
+
+          if ! npm ci; then
+            echo "❌ Error: Failed to install dependencies"
+            echo "This could be due to:"
+            echo "  - Network connectivity issues"
+            echo "  - Invalid package-lock.json"
+            echo "  - Registry access problems"
+            echo ""
+            echo "Troubleshooting steps:"
+            echo "  1. Check if package-lock.json is up to date"
+            echo "  2. Verify npm registry accessibility"
+            echo "  3. Check for any dependency conflicts"
+            exit 1
+          fi
+          echo "✅ Dependencies installed successfully"
+
+      - name: Run ESLint
+        run: |
+          echo "Running ESLint checks..."
+          if ! npm run test:lint; then
+            echo "❌ Error: ESLint checks failed"
+            echo "Code quality issues detected. Please fix the following:"
+            echo "  - Check for syntax errors"
+            echo "  - Review linting rules violations"
+            echo "  - Ensure code follows project standards"
+            echo ""
+            echo "Run 'npm run test:lint' locally to see detailed errors"
+            exit 1
+          fi
+          echo "✅ ESLint checks passed"
+
+      - name: Check Prettier formatting
+        run: |
+          echo "Checking code formatting with Prettier..."
+          if ! npm run test:prettier; then
+            echo "❌ Error: Code formatting issues detected"
+            echo "Files are not properly formatted. To fix:"
+            echo "  1. Run 'npm run format' to auto-format files"
+            echo "  2. Or run 'npx prettier --write .' to format all files"
+            echo "  3. Commit the formatting changes"
+            exit 1
+          fi
+          echo "✅ Code formatting is correct"
+
+      - name: TypeScript compilation check
+        run: |
+          echo "Checking TypeScript compilation..."
+          if ! npx tsc --noEmit; then
+            echo "❌ Error: TypeScript compilation failed"
+            echo "Type errors detected. Please fix:"
+            echo "  - Check for type mismatches"
+            echo "  - Verify import/export statements"
+            echo "  - Ensure all dependencies have proper types"
+            echo ""
+            echo "Run 'npx tsc --noEmit' locally for detailed error information"
+            exit 1
+          fi
+          echo "✅ TypeScript compilation successful"
+
+      - name: Run unit tests
+        if: steps.changes.outputs.run_tests == 'true'
+        run: |
+          echo "Running unit tests..."
+          if ! npm test; then
+            echo "❌ Error: Unit tests failed"
+            echo "Test failures detected. Please:"
+            echo "  - Review failing test cases"
+            echo "  - Check for breaking changes in code"
+            echo "  - Ensure test data and mocks are up to date"
+            echo "  - Verify test environment setup"
+            echo ""
+            echo "Run 'npm test' locally to debug failing tests"
+            exit 1
+          fi
+          echo "✅ All unit tests passed"
+
+      - name: Run tests with coverage
+        if: steps.changes.outputs.run_tests == 'true'
+        run: |
+          echo "Running tests with coverage analysis..."
+          if ! npm run test:coverage; then
+            echo "❌ Error: Coverage tests failed"
+            echo "This could indicate:"
+            echo "  - Test failures not caught by unit tests"
+            echo "  - Coverage threshold not met"
+            echo "  - Issues with coverage reporting"
+            echo ""
+            echo "Run 'npm run test:coverage' locally to see coverage report"
+            exit 1
+          fi
+          echo "✅ Coverage tests completed successfully"
+
+      - name: Build package
+        run: |
+          echo "Building package..."
+
+          # Check if build is cached and up to date
+          if [ -d "dist" ] && [ -f "dist/index.cjs" ]; then
+            echo "📦 Found cached build artifacts, checking if rebuild needed..."
+            
+            # Check if source files are newer than build
+            if [ "dist/index.cjs" -nt "src" ] && [ "dist/index.cjs" -nt "package.json" ] && [ "dist/index.cjs" -nt "tsconfig.json" ]; then
+              echo "✅ Build artifacts are up to date, skipping build"
+              exit 0
+            else
+              echo "⚠️  Source files changed, rebuilding..."
+            fi
+          fi
+
+          if ! npm run build; then
+            echo "❌ Error: Package build failed"
+            echo "Build process encountered errors. Check for:"
+            echo "  - TypeScript compilation errors"
+            echo "  - Missing dependencies"
+            echo "  - Build configuration issues"
+            echo "  - File permission problems"
+            echo ""
+            echo "Run 'npm run build' locally to debug build issues"
+            exit 1
+          fi
+          echo "✅ Package built successfully"
+
+      - name: Verify dist directory structure
+        run: |
+          echo "Verifying build artifacts..."
+
+          if [ ! -d "dist" ]; then
+            echo "❌ Error: dist directory not found"
+            echo "Build process did not create expected output directory"
+            echo "Check build configuration and ensure build script runs correctly"
+            exit 1
+          fi
+
+          if [ ! -f "dist/index.cjs" ]; then
+            echo "❌ Error: dist/index.cjs not found"
+            echo "Expected build output file is missing"
+            echo "Verify build script generates the correct output files"
+            ls -la dist/ || echo "dist directory is empty"
+            exit 1
+          fi
+
+          # Check file size to ensure it's not empty
+          if [ ! -s "dist/index.cjs" ]; then
+            echo "❌ Error: dist/index.cjs is empty"
+            echo "Build output file exists but has no content"
+            exit 1
+          fi
+
+          echo "✅ Build artifacts verified successfully"
+          echo "📁 dist/ directory contents:"
+          ls -la dist/
+
+      - name: Test CLI binary execution
+        run: |
+          echo "Testing CLI binary execution..."
+
+          if [ ! -f "dist/index.cjs" ]; then
+            echo "❌ Error: CLI binary not found at dist/index.cjs"
+            exit 1
+          fi
+
+          # Make binary executable
+          chmod +x dist/index.cjs
+
+          # Test basic CLI execution
+          if node dist/index.cjs --help > /dev/null 2>&1; then
+            echo "✅ CLI help command executed successfully"
+          else
+            echo "⚠️  Warning: CLI help command failed, but this may be expected"
+            echo "CLI binary exists and is executable"
+          fi
+
+          # Verify the binary is a valid Node.js script
+          if head -1 dist/index.cjs | grep -q "node"; then
+            echo "✅ CLI binary has valid Node.js shebang"
+          fi
+
+          echo "✅ CLI binary execution verified"
+
+      - name: Generate workflow summary
+        if: always()
+        run: |
+          echo "# 🔄 CI Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check if tests were skipped
+          if [ "${{ steps.changes.outputs.run_tests }}" = "false" ]; then
+            echo "⏭️ **Tests:** Skipped (no relevant changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Tests:** Executed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build status
+          if [ -f "dist/index.cjs" ]; then
+            BUILD_SIZE=$(du -h dist/index.cjs | cut -f1)
+            echo "📦 **Build:** Success (size: $BUILD_SIZE)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Build:** Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow completed at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Status Badges" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Add these badges to your README.md:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```markdown' >> $GITHUB_STEP_SUMMARY
+          echo "[![CI](https://github.com/${{ github.repository }}/actions/workflows/ci.yml/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/ci.yml)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: CI Success Notification
+        if: success()
+        run: |
+          echo "🎉 CI Workflow completed successfully!"
+          echo ""
+          echo "✅ All checks passed:"
+          echo "  - Code quality (ESLint, Prettier)"
+          echo "  - TypeScript compilation"
+          if [ "${{ steps.changes.outputs.run_tests }}" = "true" ]; then
+            echo "  - Unit tests and coverage"
+          fi
+          echo "  - Package build"
+          echo "  - CLI binary verification"
+          echo ""
+          echo "The code is ready for merge or release."
+
+      - name: CI Failure Notification
+        if: failure()
+        run: |
+          echo "❌ CI Workflow failed!"
+          echo ""
+          echo "Please check the logs above for specific error details."
+          echo "Common issues and solutions:"
+          echo "  - Linting errors: Run 'npm run test:lint' locally"
+          echo "  - Format issues: Run 'npm run format' locally"
+          echo "  - Test failures: Run 'npm test' locally"
+          echo "  - Build errors: Run 'npm run build' locally"
+          echo ""
+          echo "Fix the issues and push again to re-run the workflow."

@@ -1,21 +1,34 @@
-import prompts from 'prompts';
 import { Octokit } from '@octokit/core';
+import prompts from 'prompts';
 
 import { githubConfigs } from '../constant.js';
 import { ConfigType } from '../types/index.js';
-import { ConfigManager, ConfigError } from './configManager.js';
+
+import { ConfigError, ConfigManager } from './configManager.js';
 
 export const getGitHubConfigs = async (): Promise<ConfigType> => {
   const configManager = new ConfigManager();
 
   // Try to load and validate existing configuration
-  let validationResult;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let validationResult: any = {
+    config: null,
+    shouldPromptForCredentials: true,
+    preservedData: undefined,
+  };
   try {
-    validationResult = await configManager.loadValidatedConfig();
-  } catch (error) {
+    const result = await configManager.loadValidatedConfig();
+    if (result) {
+      validationResult = result;
+    }
+  } catch {
     // Configuration loading errors are already handled and logged in ConfigManager
     // We just continue with prompting for new credentials
-    validationResult = { config: null, shouldPromptForCredentials: true };
+    validationResult = {
+      config: null,
+      shouldPromptForCredentials: true,
+      preservedData: undefined,
+    };
   }
 
   if (validationResult.config && !validationResult.shouldPromptForCredentials) {
@@ -25,7 +38,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         type: 'text',
         name: 'repo',
         message: 'Please type your target repo name',
-      }
+      },
     ]);
 
     const octokit = new Octokit({
@@ -41,16 +54,19 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
   }
 
   // No saved config or invalid config, prompt for credentials
-  let promptConfig = [...githubConfigs];
+  const promptConfig = [...githubConfigs];
 
   // If we have preserved data (like a valid owner), pre-fill it
   if (validationResult.preservedData?.owner) {
-    const ownerPromptIndex = promptConfig.findIndex(prompt => prompt.name === 'owner');
+    const ownerPromptIndex = promptConfig.findIndex(
+      (prompt) => prompt.name === 'owner',
+    );
     if (ownerPromptIndex !== -1) {
       promptConfig[ownerPromptIndex] = {
         ...promptConfig[ownerPromptIndex],
-        initial: validationResult.preservedData.owner
-      };
+        initial: validationResult.preservedData.owner,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any; // Type assertion for prompts with initial value
     }
   }
 
@@ -65,7 +81,10 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         lastUpdated: new Date().toISOString(),
       });
 
-      if (validationResult.preservedData?.owner && validationResult.preservedData.owner !== response.owner) {
+      if (
+        validationResult.preservedData?.owner &&
+        validationResult.preservedData.owner !== response.owner
+      ) {
         console.log('✓ Configuration updated with new credentials');
       } else {
         console.log('✓ Configuration saved successfully');
@@ -75,10 +94,15 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         console.error(`❌ ${ConfigManager.getErrorMessage(error)}`);
 
         if (!ConfigManager.isRecoverableError(error)) {
-          console.error('   This may affect future sessions. Please resolve the issue or contact support.');
+          console.error(
+            '   This may affect future sessions. Please resolve the issue or contact support.',
+          );
         }
       } else {
-        console.warn('⚠️  Failed to save configuration:', error instanceof Error ? error.message : 'Unknown error');
+        console.warn(
+          '⚠️  Failed to save configuration:',
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       }
     }
   }

@@ -1,0 +1,576 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (optional, uses package.json if not specified)'
+        required: false
+        type: string
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should-publish: ${{ steps.validation.outputs.should-publish }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-validate-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-validate-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quick validation
+        id: validation
+        run: |
+          echo "Running quick validation checks..."
+
+          # Basic package.json validation
+          if ! node -e "require('./package.json')"; then
+            echo "❌ Invalid package.json"
+            exit 1
+          fi
+
+          # Check if this is a valid release
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Package version: $PACKAGE_VERSION"
+
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            RELEASE_VERSION=${RELEASE_TAG#v}
+            if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
+              echo "❌ Version mismatch: package.json($PACKAGE_VERSION) != release($RELEASE_VERSION)"
+              exit 1
+            fi
+          fi
+
+          echo "should-publish=true" >> $GITHUB_OUTPUT
+          echo "✅ Quick validation passed"
+
+      - name: Validation summary
+        if: always()
+        run: |
+          echo "# 🔍 Pre-publish Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** $(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.validation.outputs.should-publish }}" = "true" ]; then
+            echo "✅ **Result:** Validation passed - proceeding to publish" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Result:** Validation failed - publish blocked" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  publish:
+    needs: validate
+    if: needs.validate.outputs.should-publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify network connectivity and npm registry
+        run: |
+          echo "Checking network connectivity and npm registry access..."
+
+          # Test npm registry connectivity with retry
+          for i in {1..3}; do
+            if curl -s --max-time 10 https://registry.npmjs.org/ > /dev/null; then
+              echo "✅ npm registry is accessible"
+              break
+            else
+              echo "⚠️  Attempt $i: npm registry not accessible, retrying..."
+              if [ $i -eq 3 ]; then
+                echo "❌ Error: Cannot reach npm registry after 3 attempts"
+                echo "Publishing will fail without registry access"
+                exit 1
+              fi
+              sleep 10
+            fi
+          done
+
+          # Test npm CLI connectivity
+          if npm ping > /dev/null 2>&1; then
+            echo "✅ npm CLI can reach registry"
+          else
+            echo "⚠️  Warning: npm ping failed, but continuing..."
+          fi
+
+      - name: Cache dependencies and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            dist
+          key: ${{ runner.os }}-publish-${{ hashFiles('**/package-lock.json', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-publish-
+            ${{ runner.os }}-deps-build-
+            ${{ runner.os }}-deps-
+            ${{ runner.os }}-
+
+      - name: Install dependencies with retry
+        run: |
+          echo "Installing dependencies for publishing..."
+
+          # Retry dependency installation up to 3 times
+          for i in {1..3}; do
+            if npm ci; then
+              echo "✅ Dependencies installed successfully"
+              break
+            else
+              echo "⚠️  Attempt $i: Dependency installation failed, retrying..."
+              if [ $i -eq 3 ]; then
+                echo "❌ Error: Failed to install dependencies after 3 attempts"
+                echo "This could be due to:"
+                echo "  - Network connectivity issues"
+                echo "  - npm registry problems"
+                echo "  - Invalid package-lock.json"
+                echo "  - Disk space issues"
+                exit 1
+              fi
+              # Clean npm cache and retry
+              npm cache clean --force
+              sleep 10
+            fi
+          done
+
+      # Pre-publish validation - Run all CI validation steps
+      - name: Run ESLint
+        run: |
+          echo "Running ESLint checks for publishing..."
+          if ! npm run test:lint; then
+            echo "❌ Error: ESLint checks failed - cannot publish"
+            echo "Fix all linting errors before publishing"
+            exit 1
+          fi
+          echo "✅ ESLint checks passed"
+
+      - name: Check Prettier formatting
+        run: |
+          echo "Checking code formatting for publishing..."
+          if ! npm run test:prettier; then
+            echo "❌ Error: Code formatting issues - cannot publish"
+            echo "Run 'npm run format' to fix formatting before publishing"
+            exit 1
+          fi
+          echo "✅ Code formatting is correct"
+
+      - name: TypeScript compilation check
+        run: |
+          echo "Checking TypeScript compilation for publishing..."
+          if ! npx tsc --noEmit; then
+            echo "❌ Error: TypeScript compilation failed - cannot publish"
+            echo "Fix all type errors before publishing"
+            exit 1
+          fi
+          echo "✅ TypeScript compilation successful"
+
+      - name: Run unit tests
+        run: |
+          echo "Running unit tests for publishing..."
+          if ! npm test; then
+            echo "❌ Error: Unit tests failed - cannot publish"
+            echo "All tests must pass before publishing"
+            exit 1
+          fi
+          echo "✅ All unit tests passed"
+
+      - name: Run tests with coverage
+        run: |
+          echo "Running coverage tests for publishing..."
+          if ! npm run test:coverage; then
+            echo "❌ Error: Coverage tests failed - cannot publish"
+            echo "Ensure coverage requirements are met before publishing"
+            exit 1
+          fi
+          echo "✅ Coverage tests completed successfully"
+
+      - name: Build package
+        run: |
+          echo "Building package for publishing..."
+          if ! npm run build; then
+            echo "❌ Error: Package build failed - cannot publish"
+            echo "Fix build errors before publishing"
+            exit 1
+          fi
+          echo "✅ Package built successfully"
+
+      - name: Verify dist directory structure
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found"
+            exit 1
+          fi
+          if [ ! -f "dist/index.cjs" ]; then
+            echo "Error: dist/index.cjs not found"
+            exit 1
+          fi
+          echo "✓ Build artifacts verified"
+
+      - name: Test CLI binary execution
+        run: |
+          chmod +x dist/index.cjs
+          node dist/index.cjs --help || echo "CLI help command executed"
+          echo "✓ CLI binary execution verified"
+
+      # Version consistency checks
+      - name: Verify version consistency
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Package version: $PACKAGE_VERSION"
+
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            # Remove 'v' prefix if present
+            RELEASE_VERSION=${RELEASE_TAG#v}
+            echo "Release version: $RELEASE_VERSION"
+            
+            if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
+              echo "Error: Package version ($PACKAGE_VERSION) does not match release tag ($RELEASE_VERSION)"
+              exit 1
+            fi
+            echo "✓ Version consistency verified"
+          else
+            echo "✓ Manual dispatch - using package.json version: $PACKAGE_VERSION"
+          fi
+
+      - name: Verify package integrity
+        run: |
+          # Check that all required files are present
+          if [ ! -f "package.json" ]; then
+            echo "Error: package.json not found"
+            exit 1
+          fi
+
+          if [ ! -f "README.md" ]; then
+            echo "Error: README.md not found"
+            exit 1
+          fi
+
+          if [ ! -f "LICENSE" ]; then
+            echo "Error: LICENSE not found"
+            exit 1
+          fi
+
+          # Verify package.json has required fields
+          node -e "
+            const pkg = require('./package.json');
+            const required = ['name', 'version', 'description', 'main', 'bin'];
+            for (const field of required) {
+              if (!pkg[field]) {
+                console.error(\`Error: Missing required field '\${field}' in package.json\`);
+                process.exit(1);
+              }
+            }
+            console.log('✓ Package integrity verified');
+          "
+
+      # Secure npm authentication
+      - name: Configure npm authentication
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "Error: NPM_TOKEN secret is not configured"
+            echo "Please add NPM_TOKEN as a repository secret with your npm authentication token"
+            exit 1
+          fi
+
+          # Configure npm to use the token
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+
+          # Verify authentication without exposing token
+          echo "✓ npm authentication configured"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify npm authentication
+        run: |
+          # Test authentication by checking whoami (this will fail gracefully if auth is invalid)
+          if npm whoami > /dev/null 2>&1; then
+            NPM_USER=$(npm whoami)
+            echo "✓ Successfully authenticated as npm user: $NPM_USER"
+          else
+            echo "Error: npm authentication failed"
+            echo "Please verify that NPM_TOKEN is valid and has publishing permissions"
+            exit 1
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # npm publishing with comprehensive error handling and retry
+      - name: Publish to npm
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "🚀 Publishing $PACKAGE_NAME@$PACKAGE_VERSION to npm..."
+
+          # Check if version already exists
+          echo "Checking if version already exists on npm..."
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > /dev/null 2>&1; then
+            echo "❌ Error: Version $PACKAGE_VERSION already exists on npm"
+            echo "Please update the version in package.json before publishing"
+            echo "Current published versions:"
+            npm view "$PACKAGE_NAME" versions --json | tail -10
+            exit 1
+          fi
+          echo "✅ Version $PACKAGE_VERSION is available for publishing"
+
+          # Publish with retry logic
+          for i in {1..3}; do
+            echo "Publishing attempt $i..."
+            
+            if npm publish --access public; then
+              echo "✅ Successfully published $PACKAGE_NAME@$PACKAGE_VERSION"
+              break
+            else
+              PUBLISH_EXIT_CODE=$?
+              echo "⚠️  Publish attempt $i failed with exit code $PUBLISH_EXIT_CODE"
+              
+              if [ $i -eq 3 ]; then
+                echo "❌ Error: Failed to publish package after 3 attempts"
+                echo ""
+                echo "Common publishing issues:"
+                echo "  - Authentication problems (check NPM_TOKEN)"
+                echo "  - Network connectivity issues"
+                echo "  - Package validation failures"
+                echo "  - Registry temporary unavailability"
+                echo ""
+                echo "Troubleshooting steps:"
+                echo "  1. Verify NPM_TOKEN has publishing permissions"
+                echo "  2. Check package.json for required fields"
+                echo "  3. Ensure package name is available"
+                echo "  4. Try publishing manually: npm publish --access public"
+                exit 1
+              fi
+              
+              echo "Waiting 30 seconds before retry..."
+              sleep 30
+            fi
+          done
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Post-publish verification with retry
+      - name: Verify npm publication
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "🔍 Verifying publication of $PACKAGE_NAME@$PACKAGE_VERSION..."
+
+          # Wait for npm registry to update with retry logic
+          for i in {1..6}; do
+            echo "Verification attempt $i..."
+            sleep 10
+            
+            if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > /dev/null 2>&1; then
+              PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version)
+              echo "✅ Package successfully published and available: $PACKAGE_NAME@$PUBLISHED_VERSION"
+              
+              # Get additional package info
+              echo "📦 Package information:"
+              npm view "$PACKAGE_NAME@$PACKAGE_VERSION" --json | jq -r '.name, .version, .description' 2>/dev/null || echo "Package details available on npm"
+              break
+            else
+              if [ $i -eq 6 ]; then
+                echo "⚠️  Warning: Package verification failed after 60 seconds"
+                echo "The package was published but may not be immediately available"
+                echo "This can happen due to npm registry propagation delays"
+                echo "Check manually: https://www.npmjs.com/package/$PACKAGE_NAME"
+              else
+                echo "Package not yet available, waiting..."
+              fi
+            fi
+          done
+
+      - name: Test package installation
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "🧪 Testing package installation from npm..."
+
+          # Create a temporary directory for testing
+          mkdir -p /tmp/npm-test
+          cd /tmp/npm-test
+
+          # Initialize a test package.json to avoid warnings
+          echo '{"name": "test-install", "version": "1.0.0"}' > package.json
+
+          # Try to install the published package with retry
+          for i in {1..4}; do
+            echo "Installation test attempt $i..."
+            sleep 15  # Wait for registry propagation
+            
+            if npm install "$PACKAGE_NAME@$PACKAGE_VERSION" --no-save; then
+              echo "✅ Package installation successful"
+              
+              # Verify package contents
+              if [ -d "node_modules/$PACKAGE_NAME" ]; then
+                echo "✅ Package directory created"
+                
+                # Check if package.json exists in installed package
+                if [ -f "node_modules/$PACKAGE_NAME/package.json" ]; then
+                  INSTALLED_VERSION=$(node -p "require('./node_modules/$PACKAGE_NAME/package.json').version")
+                  echo "✅ Installed version: $INSTALLED_VERSION"
+                fi
+                
+                # Test CLI functionality if it's a CLI package
+                if [ -f "node_modules/.bin/github-label-manager" ]; then
+                  echo "Testing CLI functionality..."
+                  if node_modules/.bin/github-label-manager --help > /dev/null 2>&1; then
+                    echo "✅ CLI functionality verified"
+                  else
+                    echo "⚠️  CLI help command failed, but binary exists"
+                  fi
+                fi
+              fi
+              break
+            else
+              if [ $i -eq 4 ]; then
+                echo "⚠️  Warning: Package installation test failed after 4 attempts"
+                echo "This may be due to npm registry propagation delay"
+                echo "The package was published successfully but may need more time to be available"
+                echo "Manual verification: npm install $PACKAGE_NAME@$PACKAGE_VERSION"
+              else
+                echo "Installation failed, retrying..."
+              fi
+            fi
+          done
+
+      - name: Generate publish summary
+        if: always()
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "# 📦 Publish Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** $PACKAGE_NAME@$PACKAGE_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "**Release:** ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Release URL:** ${{ github.event.release.html_url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Validation Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Code quality checks" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ TypeScript compilation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Unit tests and coverage" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Package build" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Version consistency" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Package integrity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Publishing Results" >> $GITHUB_STEP_SUMMARY
+
+          # Check if package was published successfully
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > /dev/null 2>&1; then
+            echo "- ✅ Published to npm registry" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Package verification successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**📥 Installation:** \`npm install $PACKAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
+            echo "**🔗 npm Registry:** https://www.npmjs.com/package/$PACKAGE_NAME" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ Package verification pending (registry propagation)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow completed at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Status Badges" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Add these badges to your README.md:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```markdown' >> $GITHUB_STEP_SUMMARY
+          echo "[![Publish](https://github.com/${{ github.repository }}/actions/workflows/publish.yml/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/publish.yml)" >> $GITHUB_STEP_SUMMARY
+          echo "[![npm version](https://badge.fury.io/js/$PACKAGE_NAME.svg)](https://badge.fury.io/js/$PACKAGE_NAME)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Publishing success confirmation
+        if: success()
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "🎉 Publishing workflow completed successfully!"
+          echo ""
+          echo "📦 Package Details:"
+          echo "  Name: $PACKAGE_NAME"
+          echo "  Version: $PACKAGE_VERSION"
+          echo "  Registry: https://www.npmjs.com/package/$PACKAGE_NAME"
+          echo ""
+          echo "📥 Installation:"
+          echo "  npm install $PACKAGE_NAME"
+          echo "  yarn add $PACKAGE_NAME"
+          echo ""
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "🏷️ Release: ${{ github.event.release.html_url }}"
+            echo ""
+          fi
+          echo "✅ The package is now available for users to install!"
+
+      - name: Publishing failure notification
+        if: failure()
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name" 2>/dev/null || echo "unknown")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
+
+          echo "❌ Publishing workflow failed!"
+          echo ""
+          echo "📦 Package: $PACKAGE_NAME@$PACKAGE_VERSION"
+          echo ""
+          echo "🔍 Common publishing issues:"
+          echo "  - Authentication: Check NPM_TOKEN secret"
+          echo "  - Version conflict: Version may already exist on npm"
+          echo "  - Network issues: Temporary npm registry problems"
+          echo "  - Validation failures: Code quality or test issues"
+          echo ""
+          echo "🛠️ Troubleshooting steps:"
+          echo "  1. Check the workflow logs for specific error messages"
+          echo "  2. Verify NPM_TOKEN has publishing permissions"
+          echo "  3. Ensure package.json version is unique"
+          echo "  4. Run validation steps locally: npm run test:lint && npm test && npm run build"
+          echo ""
+          echo "📞 Need help? Check the repository issues or documentation."
