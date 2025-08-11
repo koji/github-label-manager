@@ -1,5 +1,9 @@
 # GitHub Label Manager
 
+[![CI](https://github.com/koji/github-label-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/ci.yml)
+[![Publish](https://github.com/koji/github-label-manager/actions/workflows/publish.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/publish.yml)
+[![npm version](https://badge.fury.io/js/github-label-manager.svg)](https://badge.fury.io/js/github-label-manager)
+
 A simple CLI tool to create/delete labels with GitHub Labels API. Now available as a global npm package with persistent configuration storage.
 
 <img width="846" alt="Screen Shot 2021-08-23 at 1 02 53 AM" src="https://user-images.githubusercontent.com/474225/130393065-3f2a6fed-f6a3-4b1b-8e5f-ee4fee43d70f.png">
@@ -181,6 +185,42 @@ npm install
 npm run build
 npm start
 ```
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+#### Continuous Integration (CI)
+- **Trigger**: Runs on every push and pull request
+- **Node.js Version**: 22 (latest)
+- **Steps**:
+  1. Install dependencies with caching
+  2. Run ESLint for code quality
+  3. Run Prettier for code formatting
+  4. Execute comprehensive test suite
+  5. Build package and verify CLI functionality
+  6. Generate test coverage reports
+
+#### Continuous Deployment (CD)
+- **Trigger**: Runs when a new release is published
+- **Process**:
+  1. Runs all CI validation steps
+  2. Builds the package using Vite
+  3. Publishes to npm registry automatically
+  4. Verifies successful publication
+
+#### Workflow Status
+- **CI Workflow**: Ensures code quality and functionality on every change
+- **Publish Workflow**: Automates npm package releases
+- **Caching**: Dependencies are cached for faster build times
+- **Security**: npm authentication uses encrypted repository secrets
+
+For maintainers publishing new versions:
+1. Update version in `package.json`
+2. Create and publish a GitHub release
+3. The CD pipeline will automatically publish to npm
+
+See [NPM_TOKEN_SETUP.md](./NPM_TOKEN_SETUP.md) for detailed setup instructions.
 
 ### Predefined Labels
 
