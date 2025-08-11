@@ -72,6 +72,7 @@ glm
 ### First Time Setup
 
 On your first run, you'll be prompted to enter:
+
 - **GitHub Personal Token** - Generate one [here](https://github.com/settings/tokens) with `repo` scope
 - **GitHub Username** - Your GitHub account name
 
@@ -80,7 +81,7 @@ These credentials will be securely saved and reused for future sessions.
 ### Menu Options
 
 1. **Create a single label on a specific repo**
-2. **Create multiple labels on a specific repo** 
+2. **Create multiple labels on a specific repo**
 3. **Delete a single label from a specific repo**
 4. **Delete all labels from a specific repo**
 5. **Import labels from JSON file**
@@ -100,13 +101,15 @@ The tool now includes persistent configuration storage with enhanced security:
 
 ### Security Features
 
-**Token Encryption**: 
+**Token Encryption**:
+
 - All GitHub personal tokens are automatically encrypted before being saved to disk
 - Encryption uses machine-specific keys derived from your system information
 - Existing plain text configurations are automatically migrated to encrypted format on first run
 - Even if someone gains access to your configuration file, the token remains protected
 
 **Privacy Protection**:
+
 - Tokens are never displayed in plain text in the interface
 - Only an obfuscated preview (e.g., `ghp_****...****3456`) is shown in settings
 - The settings display shows whether your token is encrypted or in plain text format
@@ -143,11 +146,13 @@ module.exports = Object.freeze([
 ## Quick Start
 
 1. Install the package globally:
+
    ```bash
    npm install -g github-label-manager
    ```
 
 2. Run the tool:
+
    ```bash
    github-label-manager
    ```
@@ -191,6 +196,7 @@ npm start
 This project uses GitHub Actions for continuous integration and deployment:
 
 #### Continuous Integration (CI)
+
 - **Trigger**: Runs on every push and pull request
 - **Node.js Version**: 22 (latest)
 - **Steps**:
@@ -202,6 +208,7 @@ This project uses GitHub Actions for continuous integration and deployment:
   6. Generate test coverage reports
 
 #### Continuous Deployment (CD)
+
 - **Trigger**: Runs when a new release is published
 - **Process**:
   1. Runs all CI validation steps
@@ -210,12 +217,14 @@ This project uses GitHub Actions for continuous integration and deployment:
   4. Verifies successful publication
 
 #### Workflow Status
+
 - **CI Workflow**: Ensures code quality and functionality on every change
 - **Publish Workflow**: Automates npm package releases
 - **Caching**: Dependencies are cached for faster build times
 - **Security**: npm authentication uses encrypted repository secrets
 
 For maintainers publishing new versions:
+
 1. Update version in `package.json`
 2. Create and publish a GitHub release
 3. The CD pipeline will automatically publish to npm
@@ -245,12 +254,14 @@ The "Create multiple labels" option uses predefined labels from `src/constant.ts
 ### Configuration File Location
 
 Your settings are stored in:
+
 - **Primary**: `~/.config/github-label-manager/config.json`
 - **Fallback**: `~/.github-label-manager-config.json`
 
 ### Viewing Your Settings
 
 Use the "Display your settings" menu option to:
+
 - See your configuration file path
 - View your stored GitHub username
 - Check if a token is saved (without revealing the actual token)
@@ -259,19 +270,24 @@ Use the "Display your settings" menu option to:
 ### Clearing Configuration
 
 If you need to reset your configuration, you can:
+
 1. Delete the configuration file manually
 2. The tool will prompt for new credentials on the next run
 
 ## Troubleshooting
 
 ### Invalid Token Error
+
 If you see authentication errors:
+
 1. Check that your token has the correct `repo` scope
 2. Verify the token hasn't expired
 3. The tool will automatically prompt for a new token if validation fails
 
 ### Permission Issues
+
 If you encounter file permission errors:
+
 - Ensure you have write access to your home directory
 - The tool will attempt to use fallback locations if needed
 

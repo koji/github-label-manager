@@ -70,7 +70,7 @@
     - _Requirements: 2.4, 2.5_
 
 - [x] 7. Write unit tests for new functionality
-  - [x] 7.1 Test ConfigManager class methods 
+  - [x] 7.1 Test ConfigManager class methods
     - Write tests for config loading, saving, and validation
     - Test error scenarios and edge cases
     - Verify file permission and security measures

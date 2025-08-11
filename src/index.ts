@@ -45,11 +45,17 @@ const setupConfigs = async () => {
   } catch (error) {
     // If the token is invalid, clear saved config and prompt again
     if (config.fromSavedConfig) {
-      console.log(chalk.yellow('Saved credentials are invalid. Please provide new credentials.'));
+      console.log(
+        chalk.yellow(
+          'Saved credentials are invalid. Please provide new credentials.',
+        ),
+      );
       await configManager.clearConfig();
       return setupConfigs(); // Retry with fresh prompts
     }
-    throw new Error(`GitHub API authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `GitHub API authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
 
   return config;
@@ -63,7 +69,11 @@ const displaySettings = async () => {
   log(chalk.blue(`Configuration file path: ${configPath}`));
 
   if (!configManager.configExists()) {
-    log(chalk.yellow('No configuration file exists. You will be prompted for credentials on next action.'));
+    log(
+      chalk.yellow(
+        'No configuration file exists. You will be prompted for credentials on next action.',
+      ),
+    );
     return;
   }
 
@@ -79,7 +89,9 @@ const displaySettings = async () => {
 
     if (config.token) {
       const isEncrypted = CryptoUtils.isTokenEncrypted(config.token);
-      const tokenStatus = isEncrypted ? '✓ Saved and encrypted' : '✓ Saved (plain text)';
+      const tokenStatus = isEncrypted
+        ? '✓ Saved and encrypted'
+        : '✓ Saved (plain text)';
       log(chalk.green(`Personal token: ${tokenStatus}`));
 
       // Show obfuscated version of the actual token (decrypted)
@@ -94,9 +106,12 @@ const displaySettings = async () => {
       const lastUpdated = new Date(config.lastUpdated);
       log(chalk.blue(`Last updated: ${lastUpdated.toLocaleString()}`));
     }
-
   } catch (error) {
-    log(chalk.red(`Error reading configuration: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    log(
+      chalk.red(
+        `Error reading configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ),
+    );
   }
 
   log(chalk.cyan('========================\n'));
@@ -124,7 +139,11 @@ const main = async () => {
         log(chalk.green(`Using saved configuration for ${configs.owner}`));
       }
     } catch (error) {
-      log(chalk.red(`Configuration error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      log(
+        chalk.red(
+          `Configuration error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ),
+      );
       return;
     }
   }
@@ -173,7 +192,11 @@ const main = async () => {
           log(chalk.yellow('No file path provided. Returning to main menu.'));
         }
       } catch (error) {
-        log(chalk.red(`Error during JSON import: ${error instanceof Error ? error.message : 'Unknown error'}`));
+        log(
+          chalk.red(
+            `Error during JSON import: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          ),
+        );
       }
       firstStart = firstStart && false;
       break;

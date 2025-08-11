@@ -26,7 +26,7 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         type: 'text',
         name: 'repo',
         message: 'Please type your target repo name',
-      }
+      },
     ]);
 
     const octokit = new Octokit({
@@ -46,11 +46,13 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
 
   // If we have preserved data (like a valid owner), pre-fill it
   if (validationResult.preservedData?.owner) {
-    const ownerPromptIndex = promptConfig.findIndex(prompt => prompt.name === 'owner');
+    const ownerPromptIndex = promptConfig.findIndex(
+      (prompt) => prompt.name === 'owner',
+    );
     if (ownerPromptIndex !== -1) {
       promptConfig[ownerPromptIndex] = {
         ...promptConfig[ownerPromptIndex],
-        initial: validationResult.preservedData.owner
+        initial: validationResult.preservedData.owner,
       };
     }
   }
@@ -66,7 +68,10 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         lastUpdated: new Date().toISOString(),
       });
 
-      if (validationResult.preservedData?.owner && validationResult.preservedData.owner !== response.owner) {
+      if (
+        validationResult.preservedData?.owner &&
+        validationResult.preservedData.owner !== response.owner
+      ) {
         console.log('✓ Configuration updated with new credentials');
       } else {
         console.log('✓ Configuration saved successfully');
@@ -76,10 +81,15 @@ export const getGitHubConfigs = async (): Promise<ConfigType> => {
         console.error(`❌ ${ConfigManager.getErrorMessage(error)}`);
 
         if (!ConfigManager.isRecoverableError(error)) {
-          console.error('   This may affect future sessions. Please resolve the issue or contact support.');
+          console.error(
+            '   This may affect future sessions. Please resolve the issue or contact support.',
+          );
         }
       } else {
-        console.warn('⚠️  Failed to save configuration:', error instanceof Error ? error.message : 'Unknown error');
+        console.warn(
+          '⚠️  Failed to save configuration:',
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       }
     }
   }

@@ -5,6 +5,7 @@ This guide explains how to migrate from CircleCI to GitHub Actions for the GitHu
 ## Overview
 
 The project has been migrated from CircleCI to GitHub Actions to provide:
+
 - Better integration with GitHub repository features
 - Simplified configuration and maintenance
 - Automated npm publishing on releases
@@ -14,6 +15,7 @@ The project has been migrated from CircleCI to GitHub Actions to provide:
 ## Comparison: CircleCI vs GitHub Actions
 
 ### CircleCI Configuration (Old)
+
 - **File**: `.circleci/config.yml`
 - **Node.js Versions**: 10, 12, latest (outdated versions)
 - **Triggers**: All commits and PRs
@@ -24,11 +26,12 @@ The project has been migrated from CircleCI to GitHub Actions to provide:
   - Coverage reporting to external service
 
 ### GitHub Actions Configuration (New)
-- **Files**: 
+
+- **Files**:
   - `.github/workflows/ci.yml` (Continuous Integration)
   - `.github/workflows/publish.yml` (Continuous Deployment)
 - **Node.js Version**: 22 (current LTS)
-- **Triggers**: 
+- **Triggers**:
   - CI: Push and pull requests
   - CD: Release publication
 - **Features**:
@@ -54,12 +57,14 @@ Ensure the following files exist and are properly configured:
 Before disabling CircleCI, verify GitHub Actions work correctly:
 
 1. **Test CI Workflow**:
+
    ```bash
    # Create a test branch and push changes
    git checkout -b test-github-actions
    git commit --allow-empty -m "Test GitHub Actions CI"
    git push origin test-github-actions
    ```
+
    - Verify the CI workflow runs successfully
    - Check that all tests pass
    - Confirm build verification works
@@ -71,6 +76,7 @@ Before disabling CircleCI, verify GitHub Actions work correctly:
    git push origin v1.0.0-test
    # Create release from GitHub UI or CLI
    ```
+
    - Verify the publish workflow triggers
    - Check npm authentication works
    - Confirm package builds successfully
@@ -86,10 +92,11 @@ Once GitHub Actions are verified to work correctly:
    - Select "Stop Building" or "Unfollow Project"
 
 2. **Remove CircleCI Configuration** (optional):
+
    ```bash
    # Remove CircleCI configuration directory
    rm -rf .circleci
-   
+
    # Commit the removal
    git add .
    git commit -m "Remove CircleCI configuration - migrated to GitHub Actions"
@@ -109,31 +116,35 @@ Once GitHub Actions are verified to work correctly:
 
 ## Feature Mapping
 
-| CircleCI Feature | GitHub Actions Equivalent | Notes |
-|------------------|---------------------------|-------|
-| Multi-version testing | Single version (Node.js 22) | Simplified to current LTS |
-| `npm test` | `npm test` | Same test execution |
-| `npm run cov:send` | Built-in coverage | Coverage handled by workflow |
-| `npm run cov:check` | Coverage validation | Integrated into CI |
-| Dependency caching | `actions/setup-node` cache | Automatic npm cache |
-| Manual triggers | `workflow_dispatch` | Manual workflow execution |
-| N/A | Automated publishing | New CD capability |
+| CircleCI Feature      | GitHub Actions Equivalent   | Notes                        |
+| --------------------- | --------------------------- | ---------------------------- |
+| Multi-version testing | Single version (Node.js 22) | Simplified to current LTS    |
+| `npm test`            | `npm test`                  | Same test execution          |
+| `npm run cov:send`    | Built-in coverage           | Coverage handled by workflow |
+| `npm run cov:check`   | Coverage validation         | Integrated into CI           |
+| Dependency caching    | `actions/setup-node` cache  | Automatic npm cache          |
+| Manual triggers       | `workflow_dispatch`         | Manual workflow execution    |
+| N/A                   | Automated publishing        | New CD capability            |
 
 ## Key Improvements
 
 ### 1. Simplified Node.js Strategy
+
 - **Before**: Testing on Node.js 10, 12, and latest
 - **After**: Single Node.js 22 version for consistency and modern features
 
 ### 2. Enhanced Security
+
 - **Before**: No automated publishing
 - **After**: Secure npm token management with GitHub secrets
 
 ### 3. Better Integration
+
 - **Before**: External CI service
 - **After**: Native GitHub integration with status checks and PR comments
 
 ### 4. Automated Publishing
+
 - **Before**: Manual npm publishing
 - **After**: Automatic publishing on GitHub releases
 
@@ -144,6 +155,7 @@ If issues arise with GitHub Actions, you can quickly rollback:
 ### Emergency Rollback
 
 1. **Re-enable CircleCI**:
+
    ```bash
    # Restore CircleCI configuration
    git checkout HEAD~1 -- .circleci/
@@ -170,16 +182,19 @@ If issues arise with GitHub Actions, you can quickly rollback:
 ## Troubleshooting
 
 ### GitHub Actions Not Running
+
 - Check workflow file syntax with GitHub's workflow validator
 - Verify repository permissions for Actions
 - Check if Actions are enabled in repository settings
 
 ### NPM Publishing Failures
+
 - Verify NPM_TOKEN secret is correctly configured
 - Check token permissions and expiration
 - See [NPM_TOKEN_SETUP.md](./NPM_TOKEN_SETUP.md) for detailed troubleshooting
 
 ### Test Failures
+
 - Compare test results between CircleCI and GitHub Actions
 - Check for Node.js version-specific issues
 - Verify all dependencies are properly installed
@@ -196,6 +211,7 @@ If issues arise with GitHub Actions, you can quickly rollback:
 ## Support
 
 If you encounter issues during migration:
+
 - Check GitHub Actions documentation: https://docs.github.com/en/actions
 - Review workflow logs in the Actions tab
 - Compare with working examples in the repository

@@ -22,11 +22,11 @@ graph TD
     E --> F[Run Tests]
     F --> G[Build Package]
     G --> H[Verify Build]
-    
+
     I[Release Created] --> J[CD Workflow]
     J --> K[Run CI Steps]
     K --> L[Publish to npm]
-    
+
     M[Cache Layer] --> D
     M --> K
 ```
@@ -34,6 +34,7 @@ graph TD
 ### Node.js Version Strategy
 
 The workflows will use a fixed Node.js version for consistency and simplicity:
+
 - Node.js 22 (Current)
 
 This provides the latest features and performance improvements while maintaining a single, consistent environment across all CI/CD operations.
@@ -45,15 +46,18 @@ This provides the latest features and performance improvements while maintaining
 **Purpose:** Automated testing and validation on every code change
 
 **Triggers:**
+
 - Push to any branch
 - Pull request creation/updates
 - Manual dispatch
 
 **Jobs:**
+
 - **test**: Runs linting, testing, and build verification on Node.js 22
 - **build-verification**: Ensures package can be built and CLI works correctly
 
 **Key Features:**
+
 - Dependency caching for faster runs
 - Single Node.js version for consistency
 - Comprehensive test coverage including integration tests
@@ -64,13 +68,16 @@ This provides the latest features and performance improvements while maintaining
 **Purpose:** Automated package publishing on releases
 
 **Triggers:**
+
 - Release creation (published releases only)
 - Manual dispatch with version input
 
 **Jobs:**
+
 - **publish**: Builds and publishes package to npm
 
 **Key Features:**
+
 - Inherits all CI validations
 - Secure npm authentication
 - Version validation
@@ -79,6 +86,7 @@ This provides the latest features and performance improvements while maintaining
 ### 3. Shared Actions and Utilities
 
 **Setup Action Pattern:**
+
 ```yaml
 - name: Setup Node.js
   uses: actions/setup-node@v4
@@ -89,6 +97,7 @@ This provides the latest features and performance improvements while maintaining
 ```
 
 **Caching Strategy:**
+
 - npm cache managed by actions/setup-node
 - Dependency cache key based on package-lock.json hash
 - Build cache for faster subsequent runs
@@ -100,7 +109,7 @@ This provides the latest features and performance improvements while maintaining
 ```yaml
 # CI Workflow Structure
 name: string
-on: 
+on:
   push: { branches: string[] }
   pull_request: { branches: string[] }
   workflow_dispatch: {}
@@ -114,9 +123,11 @@ jobs:
 ### Environment Variables and Secrets
 
 **Required Repository Secrets:**
+
 - `NPM_TOKEN`: npm authentication token for publishing
 
 **Environment Variables:**
+
 - `NODE_ENV`: Set to 'ci' during workflows
 - `CI`: Automatically set to 'true' by GitHub Actions
 
