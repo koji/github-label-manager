@@ -70,6 +70,7 @@ Before disabling CircleCI, verify GitHub Actions work correctly:
    - Confirm build verification works
 
 2. **Test CD Workflow** (optional):
+
    ```bash
    # Create a test release (can be deleted later)
    git tag v1.0.0-test

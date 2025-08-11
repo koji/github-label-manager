@@ -13,7 +13,6 @@ export class CryptoUtils {
   private static readonly ALGORITHM = 'aes-256-cbc';
   private static readonly ENCODING: BufferEncoding = 'hex';
 
-
   /**
    * Generate a machine-specific key based on system information
    * This provides basic obfuscation without requiring user passwords
