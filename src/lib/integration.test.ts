@@ -12,7 +12,7 @@ describe.skip('Integration Tests', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Tests are skipped - no setup needed
   });
 
   describe('GitHub configuration integration', () => {
