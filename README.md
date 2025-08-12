@@ -175,16 +175,13 @@ module.exports = Object.freeze([
 
 ```bash
 # Install globally
-npm install -g github-label-manager
+npm i -g hyouji
 
 # Run the tool
-github-label-manager
-
-# Or use the short alias
-glm
+hyouji
 
 # Or run without installing
-npx github-label-manager
+npx hyouji
 ```
 
 ## Development
@@ -192,52 +189,13 @@ npx github-label-manager
 If you want to contribute or run from source:
 
 ```bash
-git clone https://github.com/koji/github-label-manager.git
-cd github-label-manager
+git clone https://github.com/koji/hyouji.git
+cd hyouji
 npm install
 npm run build
 npm start
 ```
-
-### CI/CD Pipeline
-
-This project uses GitHub Actions for continuous integration and deployment:
-
-#### Continuous Integration (CI)
-
-- **Trigger**: Runs on every push and pull request
-- **Node.js Version**: 22 (latest)
-- **Steps**:
-  1. Install dependencies with caching
-  2. Run ESLint for code quality
-  3. Run Prettier for code formatting
-  4. Execute comprehensive test suite
-  5. Build package and verify CLI functionality
-  6. Generate test coverage reports
-
-#### Continuous Deployment (CD)
-
-- **Trigger**: Runs when a new release is published
-- **Process**:
-  1. Runs all CI validation steps
-  2. Builds the package using Vite
-  3. Publishes to npm registry automatically
-  4. Verifies successful publication
-
-#### Workflow Status
-
-- **CI Workflow**: Ensures code quality and functionality on every change
-- **Publish Workflow**: Automates npm package releases
-- **Caching**: Dependencies are cached for faster build times
-- **Security**: npm authentication uses encrypted repository secrets
-
-For maintainers publishing new versions:
-
-1. Update version in `package.json`
-2. Create and publish a GitHub release
-3. The CD pipeline will automatically publish to npm
-
-See [NPM_TOKEN_SETUP.md](./NPM_TOKEN_SETUP.md) for detailed setup instructions.
+You can use `pnpm`, `yarn` or `bun`.  
 
 ### Predefined Labels
 
