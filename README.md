@@ -1,6 +1,8 @@
 # GitHub Label Manager
 
-article: https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab
+### article
+
+https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab
 
 [![CI](https://github.com/koji/github-label-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/ci.yml)
 [![Publish](https://github.com/koji/github-label-manager/actions/workflows/publish.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/publish.yml)
