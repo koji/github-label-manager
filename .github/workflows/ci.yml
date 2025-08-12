@@ -47,18 +47,16 @@ jobs:
             echo "⏭️  Skipping tests - no relevant changes"
           fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          bun-version: latest
 
       - name: Verify network connectivity
         run: |
           echo "Checking network connectivity..."
 
-          # Test npm registry connectivity with retry
+          # Test npm registry connectivity with retry (bun uses npm registry)
           for i in {1..3}; do
             if curl -s --max-time 10 https://registry.npmjs.org/ > /dev/null; then
               echo "✅ npm registry is accessible"
@@ -78,10 +76,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.npm
+            ~/.bun/install/cache
             node_modules
             dist
-          key: ${{ runner.os }}-deps-build-${{ hashFiles('**/package-lock.json', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
+          key: ${{ runner.os }}-deps-build-${{ hashFiles('**/bun.lock', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-deps-build-
             ${{ runner.os }}-deps-
@@ -89,13 +87,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "Installing dependencies..."
+          echo "Installing dependencies with bun..."
 
           # Check if node_modules is cached and up to date
-          if [ -d "node_modules" ] && [ -f "node_modules/.package-lock.json" ]; then
+          if [ -d "node_modules" ] && [ -f "bun.lock" ]; then
             echo "📦 Found cached node_modules, verifying integrity..."
-            if npm ls > /dev/null 2>&1; then
-              echo "✅ Cached dependencies are valid, skipping npm ci"
+            if bun pm ls > /dev/null 2>&1; then
+              echo "✅ Cached dependencies are valid, skipping bun install"
               exit 0
             else
               echo "⚠️  Cached dependencies are invalid, reinstalling..."
@@ -103,15 +101,15 @@ jobs:
             fi
           fi
 
-          if ! npm ci; then
+          if ! bun install --frozen-lockfile; then
             echo "❌ Error: Failed to install dependencies"
             echo "This could be due to:"
             echo "  - Network connectivity issues"
-            echo "  - Invalid package-lock.json"
+            echo "  - Invalid bun.lock"
             echo "  - Registry access problems"
             echo ""
             echo "Troubleshooting steps:"
-            echo "  1. Check if package-lock.json is up to date"
+            echo "  1. Check if bun.lock is up to date"
             echo "  2. Verify npm registry accessibility"
             echo "  3. Check for any dependency conflicts"
             exit 1
@@ -121,14 +119,14 @@ jobs:
       - name: Run ESLint
         run: |
           echo "Running ESLint checks..."
-          if ! npm run test:lint; then
+          if ! bun run test:lint; then
             echo "❌ Error: ESLint checks failed"
             echo "Code quality issues detected. Please fix the following:"
             echo "  - Check for syntax errors"
             echo "  - Review linting rules violations"
             echo "  - Ensure code follows project standards"
             echo ""
-            echo "Run 'npm run test:lint' locally to see detailed errors"
+            echo "Run 'bun run test:lint' locally to see detailed errors"
             exit 1
           fi
           echo "✅ ESLint checks passed"
@@ -136,11 +134,11 @@ jobs:
       - name: Check Prettier formatting
         run: |
           echo "Checking code formatting with Prettier..."
-          if ! npm run test:prettier; then
+          if ! bun run test:prettier; then
             echo "❌ Error: Code formatting issues detected"
             echo "Files are not properly formatted. To fix:"
-            echo "  1. Run 'npm run format' to auto-format files"
-            echo "  2. Or run 'npx prettier --write .' to format all files"
+            echo "  1. Run 'bun run fix:prettier' to auto-format files"
+            echo "  2. Or run 'bunx prettier --write .' to format all files"
             echo "  3. Commit the formatting changes"
             exit 1
           fi
@@ -149,14 +147,14 @@ jobs:
       - name: TypeScript compilation check
         run: |
           echo "Checking TypeScript compilation..."
-          if ! npx tsc --noEmit; then
+          if ! bunx tsc --noEmit; then
             echo "❌ Error: TypeScript compilation failed"
             echo "Type errors detected. Please fix:"
             echo "  - Check for type mismatches"
             echo "  - Verify import/export statements"
             echo "  - Ensure all dependencies have proper types"
             echo ""
-            echo "Run 'npx tsc --noEmit' locally for detailed error information"
+            echo "Run 'bunx tsc --noEmit' locally for detailed error information"
             exit 1
           fi
           echo "✅ TypeScript compilation successful"
@@ -165,7 +163,7 @@ jobs:
         if: steps.changes.outputs.run_tests == 'true'
         run: |
           echo "Running unit tests..."
-          if ! npm test; then
+          if ! bun test; then
             echo "❌ Error: Unit tests failed"
             echo "Test failures detected. Please:"
             echo "  - Review failing test cases"
@@ -173,7 +171,7 @@ jobs:
             echo "  - Ensure test data and mocks are up to date"
             echo "  - Verify test environment setup"
             echo ""
-            echo "Run 'npm test' locally to debug failing tests"
+            echo "Run 'bun test' locally to debug failing tests"
             exit 1
           fi
           echo "✅ All unit tests passed"
@@ -182,14 +180,14 @@ jobs:
         if: steps.changes.outputs.run_tests == 'true'
         run: |
           echo "Running tests with coverage analysis..."
-          if ! npm run test:coverage; then
+          if ! bun run test:coverage; then
             echo "❌ Error: Coverage tests failed"
             echo "This could indicate:"
             echo "  - Test failures not caught by unit tests"
             echo "  - Coverage threshold not met"
             echo "  - Issues with coverage reporting"
             echo ""
-            echo "Run 'npm run test:coverage' locally to see coverage report"
+            echo "Run 'bun run test:coverage' locally to see coverage report"
             exit 1
           fi
           echo "✅ Coverage tests completed successfully"
@@ -211,7 +209,7 @@ jobs:
             fi
           fi
 
-          if ! npm run build; then
+          if ! bun run build; then
             echo "❌ Error: Package build failed"
             echo "Build process encountered errors. Check for:"
             echo "  - TypeScript compilation errors"
@@ -219,7 +217,7 @@ jobs:
             echo "  - Build configuration issues"
             echo "  - File permission problems"
             echo ""
-            echo "Run 'npm run build' locally to debug build issues"
+            echo "Run 'bun run build' locally to debug build issues"
             exit 1
           fi
           echo "✅ Package built successfully"

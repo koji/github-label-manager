@@ -22,25 +22,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22'
-          cache: 'npm'
+          bun-version: latest
 
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.npm
+            ~/.bun/install/cache
             node_modules
-          key: ${{ runner.os }}-validate-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-validate-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-validate-
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Quick validation
         id: validation
@@ -97,11 +96,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js for npm publishing
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Verify network connectivity and npm registry
@@ -135,10 +138,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.npm
+            ~/.bun/install/cache
             node_modules
             dist
-          key: ${{ runner.os }}-publish-${{ hashFiles('**/package-lock.json', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
+          key: ${{ runner.os }}-publish-${{ hashFiles('**/bun.lock', 'src/**/*', 'tsconfig.json', 'vite.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-publish-
             ${{ runner.os }}-deps-build-
@@ -151,7 +154,7 @@ jobs:
 
           # Retry dependency installation up to 3 times
           for i in {1..3}; do
-            if npm ci; then
+            if bun install --frozen-lockfile; then
               echo "✅ Dependencies installed successfully"
               break
             else
@@ -161,12 +164,12 @@ jobs:
                 echo "This could be due to:"
                 echo "  - Network connectivity issues"
                 echo "  - npm registry problems"
-                echo "  - Invalid package-lock.json"
+                echo "  - Invalid bun.lock"
                 echo "  - Disk space issues"
                 exit 1
               fi
-              # Clean npm cache and retry
-              npm cache clean --force
+              # Clean bun cache and retry
+              rm -rf ~/.bun/install/cache
               sleep 10
             fi
           done
@@ -175,7 +178,7 @@ jobs:
       - name: Run ESLint
         run: |
           echo "Running ESLint checks for publishing..."
-          if ! npm run test:lint; then
+          if ! bun run test:lint; then
             echo "❌ Error: ESLint checks failed - cannot publish"
             echo "Fix all linting errors before publishing"
             exit 1
@@ -185,9 +188,9 @@ jobs:
       - name: Check Prettier formatting
         run: |
           echo "Checking code formatting for publishing..."
-          if ! npm run test:prettier; then
+          if ! bun run test:prettier; then
             echo "❌ Error: Code formatting issues - cannot publish"
-            echo "Run 'npm run format' to fix formatting before publishing"
+            echo "Run 'bun run fix:prettier' to fix formatting before publishing"
             exit 1
           fi
           echo "✅ Code formatting is correct"
@@ -195,7 +198,7 @@ jobs:
       - name: TypeScript compilation check
         run: |
           echo "Checking TypeScript compilation for publishing..."
-          if ! npx tsc --noEmit; then
+          if ! bunx tsc --noEmit; then
             echo "❌ Error: TypeScript compilation failed - cannot publish"
             echo "Fix all type errors before publishing"
             exit 1
@@ -205,7 +208,7 @@ jobs:
       - name: Run unit tests
         run: |
           echo "Running unit tests for publishing..."
-          if ! npm test; then
+          if ! bun test; then
             echo "❌ Error: Unit tests failed - cannot publish"
             echo "All tests must pass before publishing"
             exit 1
@@ -215,7 +218,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           echo "Running coverage tests for publishing..."
-          if ! npm run test:coverage; then
+          if ! bun run test:coverage; then
             echo "❌ Error: Coverage tests failed - cannot publish"
             echo "Ensure coverage requirements are met before publishing"
             exit 1
@@ -225,7 +228,7 @@ jobs:
       - name: Build package
         run: |
           echo "Building package for publishing..."
-          if ! npm run build; then
+          if ! bun run build; then
             echo "❌ Error: Package build failed - cannot publish"
             echo "Fix build errors before publishing"
             exit 1
@@ -571,6 +574,6 @@ jobs:
           echo "  1. Check the workflow logs for specific error messages"
           echo "  2. Verify NPM_TOKEN has publishing permissions"
           echo "  3. Ensure package.json version is unique"
-          echo "  4. Run validation steps locally: npm run test:lint && npm test && npm run build"
+          echo "  4. Run validation steps locally: bun run test:lint && bun test && bun run build"
           echo ""
           echo "📞 Need help? Check the repository issues or documentation."
