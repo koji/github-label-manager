@@ -1,6 +1,6 @@
 {
   "name": "github-label-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "create and delete github labels with Labels API",
   "main": "dist/index.cjs",
   "bin": {
