@@ -6,6 +6,10 @@
 
 A simple CLI tool to create/delete labels with GitHub Labels API. Now available as a global npm package with persistent configuration storage.
 
+### article
+
+https://levelup.gitconnected.com/create-github-labels-from-terminal-158d4868fab
+
 <img width="846" alt="Screen Shot 2021-08-23 at 1 02 53 AM" src="https://user-images.githubusercontent.com/474225/130393065-3f2a6fed-f6a3-4b1b-8e5f-ee4fee43d70f.png">
 
 https://user-images.githubusercontent.com/474225/130368605-b5c6410f-53f6-4ef0-b321-8950edeebf7d.mov
