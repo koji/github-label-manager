@@ -309,30 +309,69 @@ jobs:
       - name: Configure npm authentication
         run: |
           if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "Error: NPM_TOKEN secret is not configured"
+            echo "❌ Error: NPM_TOKEN secret is not configured"
             echo "Please add NPM_TOKEN as a repository secret with your npm authentication token"
             exit 1
           fi
 
-          # Configure npm to use the token
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
+          # Validate token format
+          echo "Validating NPM_TOKEN format..."
+          if [[ ! "$NPM_TOKEN" =~ ^npm_.* ]]; then
+            echo "⚠️  Warning: NPM_TOKEN doesn't start with 'npm_'"
+            echo "Modern npm tokens should start with 'npm_' prefix"
+            echo "If you're using an older token format, it may still work"
+          else
+            echo "✓ NPM_TOKEN format looks correct"
+          fi
 
-          # Verify authentication without exposing token
+          # Configure npm to use the token using npm config commands
+          npm config set //registry.npmjs.org/:_authToken "${{ secrets.NPM_TOKEN }}"
+          npm config set registry https://registry.npmjs.org/
+          
+          # Verify the configuration was set
+          echo "npm configuration after setup:"
+          npm config list
+
           echo "✓ npm authentication configured"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify npm authentication
         run: |
+          # Debug: Check npm configuration
+          echo "Checking npm configuration:"
+          echo "Registry: $(npm config get registry)"
+          echo "Auth token configured: $(npm config get //registry.npmjs.org/:_authToken | sed 's/.*/***MASKED***/')"
+          echo ""
+          
+          # Debug: Check npm configuration
+          echo "npm configuration:"
+          npm config list
+          echo ""
+          
           # Test authentication by checking whoami (this will fail gracefully if auth is invalid)
+          echo "Testing npm authentication..."
           if npm whoami > /dev/null 2>&1; then
             NPM_USER=$(npm whoami)
             echo "✓ Successfully authenticated as npm user: $NPM_USER"
           else
-            echo "Error: npm authentication failed"
-            echo "Please verify that NPM_TOKEN is valid and has publishing permissions"
+            echo "❌ npm authentication failed"
+            echo ""
+            echo "Debugging information:"
+            echo "- NPM_TOKEN secret is set: ${{ secrets.NPM_TOKEN != '' }}"
+            echo "- Token length: ${#NPM_TOKEN}"
+            echo "- Token starts with: ${NPM_TOKEN:0:8}..."
+            echo ""
+            echo "Common issues:"
+            echo "1. Token may be expired or invalid"
+            echo "2. Token may not have publishing permissions"
+            echo "3. Token format may be incorrect (should start with 'npm_')"
+            echo "4. Account may require 2FA for publishing"
+            echo ""
+            echo "Please verify:"
+            echo "- NPM_TOKEN is a valid automation token from https://www.npmjs.com/settings/tokens"
+            echo "- Token has 'Automation' type with read/write permissions"
+            echo "- Your npm account has publishing permissions for this package"
             exit 1
           fi
         env:
