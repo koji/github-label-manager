@@ -1,4 +1,4 @@
-# GitHub Label Manager
+# Hyouji(表示) GitHub Label Manager
 
 ### article
 

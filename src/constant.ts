@@ -224,7 +224,7 @@ export const labels =
 
 export const initialText = `Please input your GitHub info`;
 
-export const AsciiText = figlet.textSync('GitHub Label Manager', {
+export const AsciiText = figlet.textSync('Hyouji', {
   font: 'Small',
   horizontalLayout: 'default',
   verticalLayout: 'default',

@@ -1,13 +1,12 @@
 {
-  "name": "github-label-manager",
-  "version": "0.0.3",
-  "description": "create and delete github labels with Labels API",
+  "name": "hyouji",
+  "version": "0.0.1",
+  "description": "Hyouji (表示) — A command-line tool for organizing and displaying GitHub labels with clarity and harmony.",
   "main": "dist/index.cjs",
   "bin": {
-    "github-label-manager": "./dist/index.cjs",
-    "glm": "./dist/index.cjs"
+    "hyouji": "./dist/index.cjs"
   },
-  "repository": "https://github.com/koji/github-label-manager",
+  "repository": "https://github.com/koji/Hyouji",
   "license": "MIT",
   "keywords": [
     "github lables",

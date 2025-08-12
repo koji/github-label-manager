@@ -1,6 +1,6 @@
 # CircleCI to GitHub Actions Migration Guide
 
-This guide explains how to migrate from CircleCI to GitHub Actions for the GitHub Label Manager project.
+This guide explains how to migrate from CircleCI to GitHub Actions for the Hyouji project.
 
 ## Overview
 
