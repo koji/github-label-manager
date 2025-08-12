@@ -324,10 +324,14 @@ jobs:
             echo "✓ NPM_TOKEN format looks correct"
           fi
 
-          # Configure npm to use the token
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
+          # Configure npm to use the token using npm config commands
+          npm config set //registry.npmjs.org/:_authToken "${{ secrets.NPM_TOKEN }}"
+          npm config set registry https://registry.npmjs.org/
+          npm config set always-auth true
+          
+          # Verify the configuration was set
+          echo "npm configuration after setup:"
+          npm config list
 
           echo "✓ npm authentication configured"
         env:
@@ -337,14 +341,19 @@ jobs:
         run: |
           # Debug: Check if .npmrc was created correctly
           echo "Checking .npmrc configuration:"
-          if [ -f ~/.npmrc ]; then
-            echo "✓ .npmrc file exists"
-            # Show .npmrc content but mask the token
-            sed 's/:_authToken=.*/:_authToken=***MASKED***/' ~/.npmrc
-          else
-            echo "❌ .npmrc file not found"
-            exit 1
+          
+          # Check the GitHub Actions npm config file
+          if [ -f "/home/runner/work/_temp/.npmrc" ]; then
+            echo "✓ GitHub Actions .npmrc file exists at /home/runner/work/_temp/.npmrc"
+            sed 's/:_authToken=.*/:_authToken=***MASKED***/' "/home/runner/work/_temp/.npmrc"
           fi
+          
+          # Check home directory .npmrc
+          if [ -f ~/.npmrc ]; then
+            echo "✓ Home .npmrc file exists at ~/.npmrc"
+            sed 's/:_authToken=.*/:_authToken=***MASKED***/' ~/.npmrc
+          fi
+          
           echo ""
           
           # Debug: Check npm configuration
