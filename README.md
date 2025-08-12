@@ -1,4 +1,4 @@
-# GitHub Label Manager
+# Hyouji(表示) GitHub Label Manager
 
 [![CI](https://github.com/koji/github-label-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/ci.yml)
 [![Publish](https://github.com/koji/github-label-manager/actions/workflows/publish.yml/badge.svg)](https://github.com/koji/github-label-manager/actions/workflows/publish.yml)

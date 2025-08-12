@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design implements a comprehensive CI/CD pipeline using GitHub Actions for the GitHub Label Manager project. The solution replaces the existing CircleCI configuration with modern GitHub Actions workflows that provide automated testing, building, and npm publishing capabilities. The design focuses on security, efficiency, and maintainability while ensuring seamless integration with the existing project structure.
+This design implements a comprehensive CI/CD pipeline using GitHub Actions for the Hyouji project. The solution replaces the existing CircleCI configuration with modern GitHub Actions workflows that provide automated testing, building, and npm publishing capabilities. The design focuses on security, efficiency, and maintainability while ensuring seamless integration with the existing project structure.
 
 ## Architecture
 

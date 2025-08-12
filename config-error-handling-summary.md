@@ -2,7 +2,7 @@
 
 ## Task 6: Create comprehensive error handling - COMPLETED ✅
 
-This document summarizes the implementation of comprehensive error handling for the GitHub Label Manager configuration system.
+This document summarizes the implementation of comprehensive error handling for the Hyouji configuration system.
 
 ## Sub-tasks Completed
 
