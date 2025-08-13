@@ -4,9 +4,12 @@
   "description": "Hyouji (表示) — A command-line tool for organizing and displaying GitHub labels with clarity and harmony.",
   "main": "dist/index.cjs",
   "bin": {
-    "hyouji": "./dist/index.cjs"
+    "hyouji": "dist/index.cjs"
   },
-  "repository": "https://github.com/koji/Hyouji",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koji/Hyouji.git"
+  },
   "license": "MIT",
   "keywords": [
     "github lables",
