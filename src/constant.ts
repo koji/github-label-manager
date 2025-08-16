@@ -1,5 +1,4 @@
-import figlet from 'figlet';
-import { render, renderFilled, PALETTES, getPaletteNames } from 'oh-my-logo';
+import { renderFilled } from 'oh-my-logo';
 
 // for github configs
 export const githubConfigs = [
